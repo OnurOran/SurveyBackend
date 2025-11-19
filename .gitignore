@@ -1,0 +1,18 @@
+# Build directories
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Visual Studio working files
+.vs/
+
+debug.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
