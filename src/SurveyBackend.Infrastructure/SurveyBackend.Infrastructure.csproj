@@ -15,6 +15,9 @@
     </PackageReference>
     <PackageReference Include="System.DirectoryServices" Version="9.0.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.5.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
