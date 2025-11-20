@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
@@ -27,7 +28,8 @@ public sealed class PermissionAuthorizationPolicyProvider : DefaultAuthorization
         }
 
         var requirement = new PermissionRequirement(permissions);
-        return new AuthorizationPolicyBuilder()
+        return new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
             .AddRequirements(requirement)
             .Build();
     }

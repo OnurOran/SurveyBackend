@@ -3,8 +3,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using SurveyBackend.Application.Interfaces.Security;
 using SurveyBackend.Application.Modules.Auth.Models;
 using SurveyBackend.Domain.Users;
@@ -26,9 +27,9 @@ public sealed class JwtTokenService : IJwtTokenService
     {
         var now = DateTimeOffset.UtcNow;
         var expiresAt = now.AddMinutes(_settings.AccessTokenMinutes);
-        var signingCredentials = new SigningCredentials(
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey)),
-            SecurityAlgorithms.HmacSha256);
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));
+        var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var permissionsJson = JsonSerializer.Serialize(permissions.Distinct(StringComparer.OrdinalIgnoreCase));
 
@@ -39,18 +40,19 @@ public sealed class JwtTokenService : IJwtTokenService
             new("username", user.Username),
             new("departmentId", user.DepartmentId.ToString()),
             new("permissions", permissionsJson),
-            new("isLocalAdmin", user.IsLocalUser.ToString())
+            new("isLocalAdmin", user.IsLocalUser.ToString().ToLowerInvariant())
+        };
+        
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            Expires = expiresAt.UtcDateTime,
+            Issuer = _settings.Issuer,
+            Audience = _settings.Audience,
+            SigningCredentials = signingCredentials
         };
 
-        var jwt = new JwtSecurityToken(
-            issuer: _settings.Issuer,
-            audience: _settings.Audience,
-            claims: claims,
-            notBefore: now.UtcDateTime,
-            expires: expiresAt.UtcDateTime,
-            signingCredentials: signingCredentials);
-
-        var accessToken = _tokenHandler.WriteToken(jwt);
+        var accessToken = _tokenHandler.CreateEncodedJwt(tokenDescriptor);
         var refreshToken = GenerateSecureToken();
         var refreshExpiresAt = now.AddDays(_settings.RefreshTokenDays);
         var expiresInSeconds = (int)TimeSpan.FromMinutes(_settings.AccessTokenMinutes).TotalSeconds;

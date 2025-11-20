@@ -37,10 +37,10 @@ public sealed class DatabaseSeeder
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.Database.EnsureCreatedAsync(cancellationToken);
         await SeedPermissionsAsync(cancellationToken);
         await SeedRolesAsync(cancellationToken);
         await SeedLocalAdminAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SeedPermissionsAsync(CancellationToken cancellationToken)
@@ -53,7 +53,6 @@ public sealed class DatabaseSeeder
             }
         }
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SeedRolesAsync(CancellationToken cancellationToken)
@@ -97,8 +96,6 @@ public sealed class DatabaseSeeder
                 role.Permissions.Remove(rolePermission);
             }
         }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task SeedLocalAdminAsync(CancellationToken cancellationToken)
@@ -112,6 +109,5 @@ public sealed class DatabaseSeeder
         var hash = _passwordHasher.Hash("Admin123");
         var user = User.CreateLocal(Guid.NewGuid(), "admin", "admin@local", Guid.Empty, hash, DateTimeOffset.UtcNow);
         await _dbContext.Users.AddAsync(user, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }
