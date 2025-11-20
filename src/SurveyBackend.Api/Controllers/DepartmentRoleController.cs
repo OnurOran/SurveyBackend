@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBackend.Api.Authorization;
 using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Modules.Authorization.Commands;
 
@@ -24,7 +25,7 @@ public class DepartmentRoleController : ControllerBase
         _removeValidator = removeValidator;
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpPost("assign")]
     public async Task<IActionResult> Assign([FromBody] AssignRoleToUserCommand command, CancellationToken cancellationToken)
     {
@@ -43,7 +44,7 @@ public class DepartmentRoleController : ControllerBase
         return NoContent();
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpPost("remove")]
     public async Task<IActionResult> Remove([FromBody] RemoveRoleFromUserCommand command, CancellationToken cancellationToken)
     {

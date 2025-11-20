@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBackend.Api.Authorization;
 using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Modules.Authorization.DTOs;
 using SurveyBackend.Application.Modules.Authorization.Queries;
@@ -18,7 +19,7 @@ public class PermissionsController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionPolicies.ManageUsers)]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<PermissionDto>>> GetAll(CancellationToken cancellationToken)
     {

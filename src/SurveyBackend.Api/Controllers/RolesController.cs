@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBackend.Api.Authorization;
 using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Modules.Authorization.Commands;
 using SurveyBackend.Application.Modules.Authorization.DTOs;
@@ -22,7 +23,7 @@ public class RolesController : ControllerBase
         _createRoleValidator = createRoleValidator;
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionPolicies.ManageUsers)]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<RoleDto>>> GetAll(CancellationToken cancellationToken)
     {
@@ -30,7 +31,7 @@ public class RolesController : ControllerBase
         return Ok(response);
     }
 
-    [Authorize]
+    [Authorize(Policy = PermissionPolicies.ManageUsers)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateRoleCommand command, CancellationToken cancellationToken)
     {
