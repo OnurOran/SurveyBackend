@@ -21,6 +21,13 @@ public sealed class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
     }
 
+    public async Task<User?> GetLocalByUsernameAsync(string username, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Users
+            .Include(u => u.RefreshTokens)
+            .FirstOrDefaultAsync(u => u.Username == username && u.IsLocalUser, cancellationToken);
+    }
+
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Users

@@ -2,6 +2,8 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using SurveyBackend.Application.Abstractions.Messaging;
+using SurveyBackend.Application.Authorization;
+using SurveyBackend.Application.Interfaces.Identity;
 
 namespace SurveyBackend.Application;
 
@@ -12,7 +14,9 @@ public static class ApplicationServiceRegistration
         var assembly = Assembly.GetExecutingAssembly();
         services.AddValidatorsFromAssembly(assembly);
         RegisterCommandHandlers(services, assembly);
+
         services.AddScoped<IAppMediator, AppMediator>();
+        services.AddScoped<IAuthorizationService, DefaultAuthorizationService>();
 
         return services;
     }

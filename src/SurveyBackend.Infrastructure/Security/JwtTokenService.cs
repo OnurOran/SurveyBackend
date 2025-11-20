@@ -1,8 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.Json;
 using SurveyBackend.Application.Interfaces.Security;
 using SurveyBackend.Application.Modules.Auth.Models;
 using SurveyBackend.Domain.Users;
@@ -20,7 +22,7 @@ public sealed class JwtTokenService : IJwtTokenService
         _settings = settings.Value;
     }
 
-    public Task<JwtTokenResult> GenerateTokensAsync(User user, CancellationToken cancellationToken)
+    public Task<JwtTokenResult> GenerateTokensAsync(User user, IEnumerable<string> permissions, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
         var expiresAt = now.AddMinutes(_settings.AccessTokenMinutes);
@@ -28,12 +30,16 @@ public sealed class JwtTokenService : IJwtTokenService
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey)),
             SecurityAlgorithms.HmacSha256);
 
+        var permissionsJson = JsonSerializer.Serialize(permissions.Distinct(StringComparer.OrdinalIgnoreCase));
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new("username", user.Username),
             new("departmentId", user.DepartmentId.ToString()),
-            new("permissions", "[]")
+            new("permissions", permissionsJson),
+            new("isLocalAdmin", user.IsLocalUser.ToString())
         };
 
         var jwt = new JwtSecurityToken(

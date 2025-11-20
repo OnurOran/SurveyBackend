@@ -1,7 +1,9 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SurveyBackend.Api.Contracts;
 using SurveyBackend.Application.Abstractions.Messaging;
+using SurveyBackend.Application.Modules.Auth.Commands.Admin;
 using SurveyBackend.Application.Modules.Auth.Commands.Login;
 using SurveyBackend.Application.Modules.Auth.Commands.Refresh;
 using SurveyBackend.Application.Modules.Auth.DTOs;
@@ -16,15 +18,18 @@ public class AuthController : ControllerBase
     private readonly IAppMediator _mediator;
     private readonly IValidator<LoginRequest> _loginRequestValidator;
     private readonly IValidator<RefreshTokenRequest> _refreshTokenRequestValidator;
+    private readonly IValidator<UpdateLocalAdminPasswordCommand> _updatePasswordValidator;
 
     public AuthController(
         IAppMediator mediator,
         IValidator<LoginRequest> loginRequestValidator,
-        IValidator<RefreshTokenRequest> refreshTokenRequestValidator)
+        IValidator<RefreshTokenRequest> refreshTokenRequestValidator,
+        IValidator<UpdateLocalAdminPasswordCommand> updatePasswordValidator)
     {
         _mediator = mediator;
         _loginRequestValidator = loginRequestValidator;
         _refreshTokenRequestValidator = refreshTokenRequestValidator;
+        _updatePasswordValidator = updatePasswordValidator;
     }
 
     [AllowAnonymous]
@@ -57,6 +62,27 @@ public class AuthController : ControllerBase
         var command = AuthMapper.ToRefreshTokenCommand(request);
         var response = await _mediator.SendAsync<RefreshTokenCommand, AuthTokensDto>(command, cancellationToken);
         return Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("admin/password")]
+    public async Task<IActionResult> UpdateAdminPassword([FromBody] UpdateAdminPasswordRequest request, CancellationToken cancellationToken)
+    {
+        if (request is null)
+        {
+            return BadRequest("Geçersiz istek.");
+        }
+
+        var command = new UpdateLocalAdminPasswordCommand(request.NewPassword);
+        var validationResult = await _updatePasswordValidator.ValidateAsync(command, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            AddErrorsToModelState(validationResult);
+            return ValidationProblem(ModelState);
+        }
+
+        await _mediator.SendAsync<UpdateLocalAdminPasswordCommand, bool>(command, cancellationToken);
+        return NoContent();
     }
 
     private void AddErrorsToModelState(FluentValidation.Results.ValidationResult validationResult)
