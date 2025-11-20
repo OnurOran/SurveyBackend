@@ -32,6 +32,7 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<IDepartmentRepository, InMemoryDepartmentRepository>();
         services.AddScoped<ILdapService, LdapService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();

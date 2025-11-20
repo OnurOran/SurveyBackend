@@ -19,6 +19,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
     private readonly IPasswordHasher _passwordHasher;
     private readonly IPermissionRepository _permissionRepository;
     private readonly IUserRoleRepository _userRoleRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public LoginCommandHandler(
         ILdapService ldapService,
@@ -28,7 +29,8 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         IJwtTokenService jwtTokenService,
         IPasswordHasher passwordHasher,
         IPermissionRepository permissionRepository,
-        IUserRoleRepository userRoleRepository)
+        IUserRoleRepository userRoleRepository,
+        IUnitOfWork unitOfWork)
     {
         _ldapService = ldapService;
         _departmentRepository = departmentRepository;
@@ -38,6 +40,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         _passwordHasher = passwordHasher;
         _permissionRepository = permissionRepository;
         _userRoleRepository = userRoleRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<AuthTokensDto> HandleAsync(LoginCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         var now = DateTimeOffset.UtcNow;
         var localUser = await _userRepository.GetLocalByUsernameAsync(request.Username, cancellationToken);
         User user;
+        Func<CancellationToken, Task>? persistUserOperation = null;
 
         if (localUser is not null && localUser.IsLocalUser)
         {
@@ -71,20 +75,28 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
             if (existingUser is null)
             {
                 user = User.Create(ldapUser.ExternalId == Guid.Empty ? Guid.NewGuid() : ldapUser.ExternalId, ldapUser.Username, ldapUser.Email, department.Id, now);
-                await _userRepository.AddAsync(user, cancellationToken);
+                persistUserOperation = ct => _userRepository.AddAsync(user, ct);
             }
             else
             {
                 existingUser.UpdateContactInformation(ldapUser.Email, department.Id, now);
-                await _userRepository.UpdateAsync(existingUser, cancellationToken);
                 user = existingUser;
+                persistUserOperation = ct => _userRepository.UpdateAsync(user, ct);
             }
         }
 
         var permissions = await ResolvePermissionsAsync(user, cancellationToken);
         var tokenResult = await _jwtTokenService.GenerateTokensAsync(user, permissions, cancellationToken);
         var refreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt, now);
-        await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+        await _unitOfWork.ExecuteAsync(async ct =>
+        {
+            if (persistUserOperation is not null)
+            {
+                await persistUserOperation(ct);
+            }
+
+            await _refreshTokenRepository.AddAsync(refreshToken, ct);
+        }, cancellationToken);
 
         var refreshTokenDto = AuthMapper.ToRefreshTokenDto(refreshToken);
         var authTokens = AuthMapper.ToAuthTokensDto(new TokenResult(tokenResult.AccessToken, refreshTokenDto.Token, tokenResult.AccessTokenExpiresInSeconds));
