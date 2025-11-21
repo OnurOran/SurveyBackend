@@ -40,7 +40,7 @@ public sealed class JwtTokenService : IJwtTokenService
             new("username", user.Username),
             new("departmentId", user.DepartmentId.ToString()),
             new("permissions", permissionsJson),
-            new("isLocalAdmin", user.IsLocalUser.ToString().ToLowerInvariant())
+            new("isSuperAdmin", user.IsSuperAdmin.ToString().ToLowerInvariant())
         };
         
         var tokenDescriptor = new SecurityTokenDescriptor

@@ -56,12 +56,14 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
 
     private async Task<IReadOnlyCollection<string>> ResolvePermissionsAsync(User user, CancellationToken cancellationToken)
     {
-        if (user.IsLocalUser)
+        if (user.IsSuperAdmin)
         {
+            // Super admin gets all permissions
             var allPermissions = await _permissionRepository.GetAllAsync(cancellationToken);
             return allPermissions.Select(p => p.Name).ToList();
         }
 
+        // Regular LDAP users get permissions from their roles
         return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, cancellationToken);
     }
 }

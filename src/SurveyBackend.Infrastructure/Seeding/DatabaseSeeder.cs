@@ -106,8 +106,8 @@ public sealed class DatabaseSeeder
             return;
         }
 
-        var hash = _passwordHasher.Hash("Admin123");
-        var user = User.CreateLocal(Guid.NewGuid(), "admin", "admin@local", Guid.Empty, hash, DateTimeOffset.UtcNow);
+        var hash = _passwordHasher.Hash("Admin123!");
+        var user = User.CreateSuperAdmin(Guid.NewGuid(), "admin", "admin@local", Guid.Empty, hash, DateTimeOffset.UtcNow);
         await _dbContext.Users.AddAsync(user, cancellationToken);
     }
 }

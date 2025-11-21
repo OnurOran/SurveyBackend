@@ -34,7 +34,7 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired();
             entity.Property(u => u.PasswordHash)
                 .HasMaxLength(512);
-            entity.Property(u => u.IsLocalUser)
+            entity.Property(u => u.IsSuperAdmin)
                 .IsRequired();
             entity.Property(u => u.CreatedAt)
                 .IsRequired();

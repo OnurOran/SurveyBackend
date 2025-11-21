@@ -26,7 +26,7 @@ public sealed class UpdateLocalAdminPasswordCommandHandler : ICommandHandler<Upd
         }
 
         var hash = _passwordHasher.Hash(request.NewPassword);
-        adminUser.UpdateLocalPassword(hash, DateTimeOffset.UtcNow);
+        adminUser.UpdateSuperAdminPassword(hash, DateTimeOffset.UtcNow);
         await _userRepository.UpdateAsync(adminUser, cancellationToken);
         return true;
     }

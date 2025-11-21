@@ -7,7 +7,7 @@ public class User
     public string Email { get; private set; } = null!;
     public Guid DepartmentId { get; private set; }
     public string? PasswordHash { get; private set; }
-    public bool IsLocalUser { get; private set; }
+    public bool IsSuperAdmin { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset UpdatedAt { get; private set; }
 
@@ -18,13 +18,13 @@ public class User
     {
     }
 
-    private User(Guid id, string username, string email, Guid departmentId, bool isLocalUser, string? passwordHash, DateTimeOffset createdAt)
+    private User(Guid id, string username, string email, Guid departmentId, bool isSuperAdmin, string? passwordHash, DateTimeOffset createdAt)
     {
         Id = id;
         Username = username;
         Email = email;
         DepartmentId = departmentId;
-        IsLocalUser = isLocalUser;
+        IsSuperAdmin = isSuperAdmin;
         PasswordHash = passwordHash;
         CreatedAt = createdAt;
         UpdatedAt = createdAt;
@@ -35,7 +35,7 @@ public class User
         return new User(id, username, email, departmentId, false, null, createdAt);
     }
 
-    public static User CreateLocal(Guid id, string username, string email, Guid departmentId, string passwordHash, DateTimeOffset createdAt)
+    public static User CreateSuperAdmin(Guid id, string username, string email, Guid departmentId, string passwordHash, DateTimeOffset createdAt)
     {
         return new User(id, username, email, departmentId, true, passwordHash, createdAt);
     }
@@ -54,10 +54,10 @@ public class User
         return refreshToken;
     }
 
-    public void UpdateLocalPassword(string passwordHash, DateTimeOffset updatedAt)
+    public void UpdateSuperAdminPassword(string passwordHash, DateTimeOffset updatedAt)
     {
         PasswordHash = passwordHash;
-        IsLocalUser = true;
+        IsSuperAdmin = true;
         UpdatedAt = updatedAt;
     }
 }

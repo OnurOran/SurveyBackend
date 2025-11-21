@@ -37,11 +37,11 @@ public sealed class CurrentUserService : ICurrentUserService
 
     public bool IsAuthenticated => User?.Identity?.IsAuthenticated ?? false;
 
-    public bool IsLocalAdmin => bool.TryParse(User?.FindFirst("isLocalAdmin")?.Value, out var value) && value;
+    public bool IsSuperAdmin => bool.TryParse(User?.FindFirst("isSuperAdmin")?.Value, out var value) && value;
 
     public bool HasPermission(string permission)
     {
-        if (IsLocalAdmin)
+        if (IsSuperAdmin)
         {
             return true;
         }

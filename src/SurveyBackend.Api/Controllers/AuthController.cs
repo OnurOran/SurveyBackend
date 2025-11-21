@@ -5,6 +5,7 @@ using SurveyBackend.Api.Contracts;
 using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Modules.Auth.Commands.Admin;
 using SurveyBackend.Application.Modules.Auth.Commands.Login;
+using SurveyBackend.Application.Modules.Auth.Commands.Logout;
 using SurveyBackend.Application.Modules.Auth.Commands.Refresh;
 using SurveyBackend.Application.Modules.Auth.DTOs;
 using SurveyBackend.Application.Modules.Auth.Mappings;
@@ -64,7 +65,32 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
-    [AllowAnonymous]
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request, CancellationToken cancellationToken)
+    {
+        if (request is null || string.IsNullOrWhiteSpace(request.RefreshToken))
+        {
+            return BadRequest("Geçersiz istek.");
+        }
+
+        var command = new LogoutCommand(request.RefreshToken);
+        await _mediator.SendAsync<LogoutCommand, bool>(command, cancellationToken);
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("test")]
+    public IActionResult Test()
+    {
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        return Ok(new {
+            isAuthenticated = User.Identity?.IsAuthenticated,
+            claims = claims
+        });
+    }
+
+    [Authorize]
     [HttpPost("admin/password")]
     public async Task<IActionResult> UpdateAdminPassword([FromBody] UpdateAdminPasswordRequest request, CancellationToken cancellationToken)
     {

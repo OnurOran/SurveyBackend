@@ -13,7 +13,7 @@ public sealed class DefaultAuthorizationService : IAuthorizationService
 
     public Task EnsurePermissionAsync(string permissionName, CancellationToken cancellationToken)
     {
-        if (_currentUserService.IsLocalAdmin)
+        if (_currentUserService.IsSuperAdmin)
         {
             return Task.CompletedTask;
         }
@@ -28,7 +28,7 @@ public sealed class DefaultAuthorizationService : IAuthorizationService
 
     public Task EnsureDepartmentScopeAsync(Guid departmentId, CancellationToken cancellationToken)
     {
-        if (_currentUserService.IsLocalAdmin)
+        if (_currentUserService.IsSuperAdmin)
         {
             return Task.CompletedTask;
         }
@@ -43,7 +43,7 @@ public sealed class DefaultAuthorizationService : IAuthorizationService
 
     public Task EnsureRoleManagementAsync(Guid departmentId, CancellationToken cancellationToken)
     {
-        if (_currentUserService.IsLocalAdmin || _currentUserService.HasPermission("ManageUsers"))
+        if (_currentUserService.IsSuperAdmin || _currentUserService.HasPermission("ManageUsers"))
         {
             return Task.CompletedTask;
         }

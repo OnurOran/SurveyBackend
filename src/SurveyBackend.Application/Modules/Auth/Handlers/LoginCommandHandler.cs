@@ -5,6 +5,7 @@ using SurveyBackend.Application.Modules.Auth.Commands.Login;
 using SurveyBackend.Application.Modules.Auth.DTOs;
 using SurveyBackend.Application.Modules.Auth.Mappings;
 using SurveyBackend.Application.Modules.Auth.Models;
+using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Users;
 
 namespace SurveyBackend.Application.Modules.Auth.Handlers;
@@ -50,7 +51,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         User user;
         Func<CancellationToken, Task>? persistUserOperation = null;
 
-        if (localUser is not null && localUser.IsLocalUser)
+        if (localUser is not null && localUser.IsSuperAdmin)
         {
             if (string.IsNullOrWhiteSpace(localUser.PasswordHash) || !_passwordHasher.Verify(localUser.PasswordHash, request.Password))
             {
@@ -67,8 +68,13 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
                 throw new UnauthorizedAccessException("Kullanıcı doğrulanamadı.");
             }
 
-            var department = await _departmentRepository.GetByExternalIdentifierAsync(ldapUser.DepartmentName, cancellationToken)
-                             ?? throw new InvalidOperationException("Departman eşlemesi bulunamadı.");
+            // Auto-create department if it doesn't exist
+            var department = await _departmentRepository.GetByExternalIdentifierAsync(ldapUser.DepartmentName, cancellationToken);
+            if (department is null)
+            {
+                department = new Department(Guid.NewGuid(), ldapUser.DepartmentName, ldapUser.DepartmentName.ToLowerInvariant());
+                await _departmentRepository.AddAsync(department, cancellationToken);
+            }
 
             var existingUser = await _userRepository.GetByUsernameAsync(ldapUser.Username, cancellationToken);
 
@@ -105,12 +111,14 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
 
     private async Task<IReadOnlyCollection<string>> ResolvePermissionsAsync(User user, CancellationToken cancellationToken)
     {
-        if (user.IsLocalUser)
+        if (user.IsSuperAdmin)
         {
+            // Super admin gets all permissions
             var allPermissions = await _permissionRepository.GetAllAsync(cancellationToken);
             return allPermissions.Select(p => p.Name).ToList();
         }
 
+        // Regular LDAP users get permissions from their roles
         return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, cancellationToken);
     }
 }

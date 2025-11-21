@@ -6,17 +6,32 @@ namespace SurveyBackend.Api.Authorization;
 
 public sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
+    private readonly ILogger<PermissionAuthorizationHandler> _logger;
     private const string PermissionsClaimType = "permissions";
     private const string IndividualPermissionClaimType = "permission";
-    private const string IsLocalAdminClaimType = "isLocalAdmin";
+    private const string IsSuperAdminClaimType = "isSuperAdmin";
+
+    public PermissionAuthorizationHandler(ILogger<PermissionAuthorizationHandler> logger)
+    {
+        _logger = logger;
+    }
 
     protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {
-        if (IsLocalAdmin(context))
+        _logger.LogInformation("HandleRequirementAsync called for permissions: {Permissions}", string.Join(", ", requirement.Permissions));
+        _logger.LogInformation("User authenticated: {IsAuthenticated}", context.User.Identity?.IsAuthenticated);
+
+        var superAdminClaim = context.User.FindFirst(IsSuperAdminClaimType);
+        _logger.LogInformation("SuperAdmin claim: {Claim}", superAdminClaim?.Value ?? "null");
+
+        if (IsSuperAdmin(context))
         {
+            _logger.LogInformation("User is SuperAdmin - granting access");
             context.Succeed(requirement);
             return Task.CompletedTask;
         }
+
+        _logger.LogInformation("User is NOT SuperAdmin - checking permissions");
 
         var directPermissions = context.User.FindAll(IndividualPermissionClaimType).Select(p => p.Value).ToArray();
         if (directPermissions.Length > 0 && requirement.IsSatisfiedBy(directPermissions))
@@ -47,10 +62,10 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
         return Task.CompletedTask;
     }
 
-    private static bool IsLocalAdmin(AuthorizationHandlerContext context)
+    private static bool IsSuperAdmin(AuthorizationHandlerContext context)
     {
-        var isLocalAdmin = context.User.FindFirst(IsLocalAdminClaimType)?.Value;
-        return isLocalAdmin is not null && bool.TryParse(isLocalAdmin, out var result) && result;
+        var isSuperAdmin = context.User.FindFirst(IsSuperAdminClaimType)?.Value;
+        return isSuperAdmin is not null && bool.TryParse(isSuperAdmin, out var result) && result;
     }
 
     private static IEnumerable<string> ParsePermissions(string rawValue)

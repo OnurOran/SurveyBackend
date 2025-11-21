@@ -12,7 +12,7 @@ using SurveyBackend.Infrastructure.Persistence;
 namespace SurveyBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(SurveyBackendDbContext))]
-    [Migration("20251120113939_InitialCreate")]
+    [Migration("20251121070257_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -132,7 +132,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<bool>("IsLocalUser")
+                    b.Property<bool>("IsSuperAdmin")
                         .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")

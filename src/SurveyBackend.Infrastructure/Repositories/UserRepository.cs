@@ -25,7 +25,7 @@ public sealed class UserRepository : IUserRepository
     {
         return await _dbContext.Users
             .Include(u => u.RefreshTokens)
-            .FirstOrDefaultAsync(u => u.Username == username && u.IsLocalUser, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Username == username && u.IsSuperAdmin, cancellationToken);
     }
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)

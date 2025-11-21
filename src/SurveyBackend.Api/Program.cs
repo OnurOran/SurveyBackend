@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SurveyBackend.Api.Middleware;
 using SurveyBackend.Api.Services;
 using SurveyBackend.Api.Authorization;
 using SurveyBackend.Application;
 using SurveyBackend.Application.Interfaces.Identity;
 using SurveyBackend.Infrastructure;
+using SurveyBackend.Infrastructure.BackgroundServices;
 using SurveyBackend.Infrastructure.Configurations;
 using SurveyBackend.Infrastructure.Seeding;
 
@@ -72,6 +74,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
+// Register background services
+builder.Services.AddHostedService<TokenCleanupService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -88,6 +93,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Add rate limiting middleware before authentication
+app.UseMiddleware<LoginRateLimitingMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
