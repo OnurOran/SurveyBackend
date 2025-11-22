@@ -28,7 +28,7 @@ public sealed class DefaultAuthorizationService : IAuthorizationService
 
     public Task EnsureDepartmentScopeAsync(Guid departmentId, CancellationToken cancellationToken)
     {
-        if (_currentUserService.IsSuperAdmin)
+        if (_currentUserService.IsSuperAdmin || _currentUserService.HasPermission("ManageUsers"))
         {
             return Task.CompletedTask;
         }

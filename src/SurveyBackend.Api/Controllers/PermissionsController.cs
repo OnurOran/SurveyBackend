@@ -19,7 +19,7 @@ public class PermissionsController : ControllerBase
         _mediator = mediator;
     }
 
-    [Authorize(Policy = PermissionPolicies.ManageUsers)]
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<PermissionDto>>> GetAll(CancellationToken cancellationToken)
     {

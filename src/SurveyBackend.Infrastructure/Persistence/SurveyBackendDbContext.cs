@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Roles;
 using SurveyBackend.Domain.Users;
 
@@ -17,9 +18,24 @@ public class SurveyBackendDbContext : DbContext
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<Department> Departments => Set<Department>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.ToTable("Departments");
+            entity.HasKey(d => d.Id);
+            entity.Property(d => d.Name)
+                .IsRequired()
+                .HasMaxLength(256);
+            entity.Property(d => d.ExternalIdentifier)
+                .IsRequired()
+                .HasMaxLength(256);
+            entity.HasIndex(d => d.ExternalIdentifier)
+                .IsUnique();
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("Users");
@@ -40,6 +56,10 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired();
             entity.Property(u => u.UpdatedAt)
                 .IsRequired();
+            entity.HasOne<Department>()
+                .WithMany()
+                .HasForeignKey(u => u.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasMany(u => u.RefreshTokens)
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId);
@@ -102,10 +122,16 @@ public class SurveyBackendDbContext : DbContext
         modelBuilder.Entity<UserRole>(entity =>
         {
             entity.ToTable("UserRoles");
-            entity.HasKey(ur => new { ur.UserId, ur.RoleId });
+            entity.HasKey(ur => new { ur.UserId, ur.RoleId, ur.DepartmentId });
+            entity.Property(ur => ur.DepartmentId)
+                .IsRequired();
             entity.HasOne(ur => ur.Role)
                 .WithMany()
                 .HasForeignKey(ur => ur.RoleId);
+            entity.HasOne(ur => ur.Department)
+                .WithMany()
+                .HasForeignKey(ur => ur.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

@@ -35,6 +35,16 @@ public sealed class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<User>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Users
+            .Include(u => u.Roles)
+                .ThenInclude(ur => ur.Role)
+            .Where(u => u.DepartmentId == departmentId)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(User user, CancellationToken cancellationToken)
     {
         _dbContext.Users.Add(user);

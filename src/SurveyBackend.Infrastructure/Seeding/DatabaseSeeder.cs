@@ -1,6 +1,7 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SurveyBackend.Application.Interfaces.Security;
+using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Roles;
 using SurveyBackend.Domain.Users;
 using SurveyBackend.Infrastructure.Persistence;
@@ -28,6 +29,7 @@ public sealed class DatabaseSeeder
 
     private readonly SurveyBackendDbContext _dbContext;
     private readonly IPasswordHasher _passwordHasher;
+    private static readonly Guid SystemDepartmentId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
     public DatabaseSeeder(SurveyBackendDbContext dbContext, IPasswordHasher passwordHasher)
     {
@@ -37,6 +39,9 @@ public sealed class DatabaseSeeder
 
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
+        await SeedSystemDepartmentAsync(cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         await SeedPermissionsAsync(cancellationToken);
         await SeedRolesAsync(cancellationToken);
         await SeedLocalAdminAsync(cancellationToken);
@@ -107,7 +112,18 @@ public sealed class DatabaseSeeder
         }
 
         var hash = _passwordHasher.Hash("Admin123!");
-        var user = User.CreateSuperAdmin(Guid.NewGuid(), "admin", "admin@local", Guid.Empty, hash, DateTimeOffset.UtcNow);
+        var user = User.CreateSuperAdmin(Guid.NewGuid(), "admin", "admin@local", SystemDepartmentId, hash, DateTimeOffset.UtcNow);
         await _dbContext.Users.AddAsync(user, cancellationToken);
+    }
+
+    private async Task SeedSystemDepartmentAsync(CancellationToken cancellationToken)
+    {
+        if (await _dbContext.Departments.AnyAsync(d => d.Id == SystemDepartmentId, cancellationToken))
+        {
+            return;
+        }
+
+        var department = Department.Create(SystemDepartmentId, "System", "system");
+        await _dbContext.Departments.AddAsync(department, cancellationToken);
     }
 }

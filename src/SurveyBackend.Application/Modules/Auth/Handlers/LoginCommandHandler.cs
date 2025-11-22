@@ -7,6 +7,7 @@ using SurveyBackend.Application.Modules.Auth.Mappings;
 using SurveyBackend.Application.Modules.Auth.Models;
 using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Users;
+using System.Text.RegularExpressions;
 
 namespace SurveyBackend.Application.Modules.Auth.Handlers;
 
@@ -50,6 +51,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         var localUser = await _userRepository.GetLocalByUsernameAsync(request.Username, cancellationToken);
         User user;
         Func<CancellationToken, Task>? persistUserOperation = null;
+        var shouldClearRoles = false;
 
         if (localUser is not null && localUser.IsSuperAdmin)
         {
@@ -68,11 +70,13 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
                 throw new UnauthorizedAccessException("Kullanıcı doğrulanamadı.");
             }
 
+            var (departmentName, externalIdentifier) = NormalizeDepartment(ldapUser.DepartmentName);
+
             // Auto-create department if it doesn't exist
-            var department = await _departmentRepository.GetByExternalIdentifierAsync(ldapUser.DepartmentName, cancellationToken);
+            var department = await _departmentRepository.GetByExternalIdentifierAsync(externalIdentifier, cancellationToken);
             if (department is null)
             {
-                department = new Department(Guid.NewGuid(), ldapUser.DepartmentName, ldapUser.DepartmentName.ToLowerInvariant());
+                department = Department.Create(Guid.NewGuid(), departmentName, externalIdentifier);
                 await _departmentRepository.AddAsync(department, cancellationToken);
             }
 
@@ -85,10 +89,20 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
             }
             else
             {
+                if (existingUser.DepartmentId != department.Id)
+                {
+                    shouldClearRoles = true;
+                }
+
                 existingUser.UpdateContactInformation(ldapUser.Email, department.Id, now);
                 user = existingUser;
                 persistUserOperation = ct => _userRepository.UpdateAsync(user, ct);
             }
+        }
+
+        if (shouldClearRoles)
+        {
+            await _userRoleRepository.RemoveAllRolesAsync(user.Id, cancellationToken);
         }
 
         var permissions = await ResolvePermissionsAsync(user, cancellationToken);
@@ -119,6 +133,32 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         }
 
         // Regular LDAP users get permissions from their roles
-        return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, cancellationToken);
+        return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, user.DepartmentId, cancellationToken);
+    }
+
+    private static (string DepartmentName, string ExternalIdentifier) NormalizeDepartment(string rawDepartment)
+    {
+        if (string.IsNullOrWhiteSpace(rawDepartment))
+        {
+            throw new UnauthorizedAccessException("Kullanıcı için geçerli bir departman bulunamadı.");
+        }
+
+        var trimmed = rawDepartment.Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            throw new UnauthorizedAccessException("Kullanıcı için geçerli bir departman bulunamadı.");
+        }
+
+        var normalized = Regex.Replace(trimmed, @"\s+", " ");
+        var slug = normalized
+            .ToLowerInvariant()
+            .Replace(' ', '-');
+
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            throw new UnauthorizedAccessException("Departman bilgisi boş olamaz.");
+        }
+
+        return (normalized, slug);
     }
 }

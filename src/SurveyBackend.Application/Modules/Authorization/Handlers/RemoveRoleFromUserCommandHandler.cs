@@ -27,7 +27,7 @@ public sealed class RemoveRoleFromUserCommandHandler : ICommandHandler<RemoveRol
 
         await _authorizationService.EnsureRoleManagementAsync(user.DepartmentId, cancellationToken);
 
-        await _userRoleRepository.RemoveRoleAsync(user.Id, request.RoleId, cancellationToken);
+        await _userRoleRepository.RemoveRoleAsync(user.Id, request.RoleId, user.DepartmentId, cancellationToken);
         return true;
     }
 }

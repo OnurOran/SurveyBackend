@@ -12,8 +12,8 @@ using SurveyBackend.Infrastructure.Persistence;
 namespace SurveyBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(SurveyBackendDbContext))]
-    [Migration("20251121070257_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251122093053_DepartmentScope")]
+    partial class DepartmentScope
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,30 @@ namespace SurveyBackend.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("SurveyBackend.Domain.Departments.Department", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ExternalIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExternalIdentifier")
+                        .IsUnique();
+
+                    b.ToTable("Departments", (string)null);
+                });
 
             modelBuilder.Entity("SurveyBackend.Domain.Roles.Permission", b =>
                 {
@@ -149,6 +173,8 @@ namespace SurveyBackend.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Users", (string)null);
                 });
 
@@ -160,7 +186,12 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("UserId", "RoleId");
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserId", "RoleId", "DepartmentId");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("RoleId");
 
@@ -197,8 +228,23 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SurveyBackend.Domain.Users.User", b =>
+                {
+                    b.HasOne("SurveyBackend.Domain.Departments.Department", null)
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("SurveyBackend.Domain.Users.UserRole", b =>
                 {
+                    b.HasOne("SurveyBackend.Domain.Departments.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SurveyBackend.Domain.Roles.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
@@ -210,6 +256,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Department");
 
                     b.Navigation("Role");
 

@@ -64,6 +64,6 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
         }
 
         // Regular LDAP users get permissions from their roles
-        return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, cancellationToken);
+        return await _userRoleRepository.GetPermissionsForUserAsync(user.Id, user.DepartmentId, cancellationToken);
     }
 }

@@ -23,7 +23,7 @@ public class RolesController : ControllerBase
         _createRoleValidator = createRoleValidator;
     }
 
-    [Authorize(Policy = PermissionPolicies.ManageUsers)]
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyCollection<RoleDto>>> GetAll(CancellationToken cancellationToken)
     {
