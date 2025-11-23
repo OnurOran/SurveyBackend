@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace SurveyBackend.Domain.Surveys;
 
 public class Participation
@@ -35,10 +37,20 @@ public class Participation
         CompletedAt = completedAt;
     }
 
-    public Answer AddAnswer(Guid id, Guid questionId, string? textValue)
+    public Answer AddOrUpdateAnswer(Guid id, Guid questionId, string? textValue, IEnumerable<Guid>? optionIds = null)
     {
-        var answer = new Answer(id, Id, questionId, textValue);
-        Answers.Add(answer);
+        var answer = Answers.FirstOrDefault(a => a.QuestionId == questionId);
+        if (answer is null)
+        {
+            answer = new Answer(id, Id, questionId, textValue);
+            Answers.Add(answer);
+        }
+        else
+        {
+            answer.Update(textValue);
+        }
+
+        answer.ReplaceSelectedOptions(optionIds);
         return answer;
     }
 }

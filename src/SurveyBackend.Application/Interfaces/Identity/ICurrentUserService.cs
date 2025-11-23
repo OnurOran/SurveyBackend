@@ -8,5 +8,6 @@ public interface ICurrentUserService
     Guid? DepartmentId { get; }
     bool IsAuthenticated { get; }
     bool IsSuperAdmin { get; }
+    string? Username { get; }
     bool HasPermission(string permission);
 }

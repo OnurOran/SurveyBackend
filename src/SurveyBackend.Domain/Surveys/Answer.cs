@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace SurveyBackend.Domain.Surveys;
 
 public class Answer
@@ -28,5 +30,24 @@ public class Answer
         var selection = new AnswerOption(id, Id, questionOptionId);
         SelectedOptions.Add(selection);
         return selection;
+    }
+
+    public void Update(string? textValue)
+    {
+        TextValue = textValue?.Trim();
+    }
+
+    public void ReplaceSelectedOptions(IEnumerable<Guid>? optionIds)
+    {
+        SelectedOptions.Clear();
+        if (optionIds is null)
+        {
+            return;
+        }
+
+        foreach (var optionId in optionIds.Distinct())
+        {
+            SelectedOptions.Add(new AnswerOption(Guid.NewGuid(), Id, optionId));
+        }
     }
 }

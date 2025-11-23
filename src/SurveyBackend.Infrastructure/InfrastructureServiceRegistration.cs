@@ -7,6 +7,8 @@ using SurveyBackend.Infrastructure.Persistence;
 using SurveyBackend.Infrastructure.Repositories;
 using SurveyBackend.Infrastructure.Repositories.Authorization;
 using SurveyBackend.Infrastructure.Repositories.Departments;
+using SurveyBackend.Infrastructure.Repositories.Participations;
+using SurveyBackend.Infrastructure.Repositories.Surveys;
 using SurveyBackend.Infrastructure.Seeding;
 using SurveyBackend.Infrastructure.Security;
 
@@ -32,6 +34,9 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<IPermissionRepository, PermissionRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+        services.AddScoped<ISurveyRepository, SurveyRepository>();
+        services.AddScoped<IParticipantRepository, ParticipantRepository>();
+        services.AddScoped<IParticipationRepository, ParticipationRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<ILdapService, LdapService>();

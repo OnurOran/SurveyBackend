@@ -39,6 +39,8 @@ public sealed class CurrentUserService : ICurrentUserService
 
     public bool IsSuperAdmin => bool.TryParse(User?.FindFirst("isSuperAdmin")?.Value, out var value) && value;
 
+    public string? Username => User?.FindFirst("username")?.Value;
+
     public bool HasPermission(string permission)
     {
         if (IsSuperAdmin)

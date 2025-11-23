@@ -28,4 +28,14 @@ public class Participant
 
         return new Participant(id, externalId, ldapUsername?.Trim(), createdAt);
     }
+
+    public static Participant CreateAnonymous(Guid id, Guid externalId, DateTimeOffset createdAt)
+    {
+        return Create(id, createdAt, externalId, null);
+    }
+
+    public static Participant CreateInternal(Guid id, string ldapUsername, DateTimeOffset createdAt)
+    {
+        return Create(id, createdAt, null, ldapUsername);
+    }
 }
