@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using SurveyBackend.Domain.Departments;
+using SurveyBackend.Domain.Enums;
 using SurveyBackend.Domain.Roles;
+using SurveyBackend.Domain.Surveys;
 using SurveyBackend.Domain.Users;
 
 namespace SurveyBackend.Infrastructure.Persistence;
@@ -19,6 +21,14 @@ public class SurveyBackendDbContext : DbContext
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Survey> Surveys => Set<Survey>();
+    public DbSet<Question> Questions => Set<Question>();
+    public DbSet<QuestionOption> QuestionOptions => Set<QuestionOption>();
+    public DbSet<DependentQuestion> DependentQuestions => Set<DependentQuestion>();
+    public DbSet<Participant> Participants => Set<Participant>();
+    public DbSet<Participation> Participations => Set<Participation>();
+    public DbSet<Answer> Answers => Set<Answer>();
+    public DbSet<AnswerOption> AnswerOptions => Set<AnswerOption>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -132,6 +142,178 @@ public class SurveyBackendDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(ur => ur.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Survey>(entity =>
+        {
+            entity.ToTable("Surveys");
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+            entity.Property(s => s.Description)
+                .HasMaxLength(2000);
+            entity.Property(s => s.CreatedBy)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(s => s.CreatedAt)
+                .IsRequired();
+            entity.Property(s => s.AccessType)
+                .IsRequired();
+            entity.Property(s => s.IsActive)
+                .IsRequired()
+                .HasDefaultValue(false);
+            entity.Property(s => s.StartDate);
+            entity.Property(s => s.EndDate);
+
+            entity.HasMany(s => s.Questions)
+                .WithOne(q => q.Survey)
+                .HasForeignKey(q => q.SurveyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Question>(entity =>
+        {
+            entity.ToTable("Questions");
+            entity.HasKey(q => q.Id);
+            entity.Property(q => q.Text)
+                .IsRequired()
+                .HasMaxLength(1000);
+            entity.Property(q => q.Description)
+                .HasMaxLength(500);
+            entity.Property(q => q.Order)
+                .IsRequired();
+            entity.Property(q => q.Type)
+                .IsRequired();
+            entity.Property(q => q.IsRequired)
+                .IsRequired();
+
+            entity.HasMany(q => q.Options)
+                .WithOne(o => o.Question)
+                .HasForeignKey(o => o.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany<Answer>()
+                .WithOne(a => a.Question)
+                .HasForeignKey(a => a.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<QuestionOption>(entity =>
+        {
+            entity.ToTable("QuestionOptions");
+            entity.HasKey(qo => qo.Id);
+            entity.Property(qo => qo.Text)
+                .IsRequired()
+                .HasMaxLength(500);
+            entity.Property(qo => qo.Order)
+                .IsRequired();
+            entity.Property(qo => qo.Value);
+
+            entity.HasMany(qo => qo.DependentQuestions)
+                .WithOne(dq => dq.ParentOption)
+                .HasForeignKey(dq => dq.ParentQuestionOptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DependentQuestion>(entity =>
+        {
+            entity.ToTable("DependentQuestions");
+            entity.HasKey(dq => dq.Id);
+            entity.Property(dq => dq.ParentQuestionOptionId)
+                .IsRequired();
+            entity.Property(dq => dq.ChildQuestionId)
+                .IsRequired();
+
+            entity.HasOne(dq => dq.ChildQuestion)
+                .WithMany()
+                .HasForeignKey(dq => dq.ChildQuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Participant>(entity =>
+        {
+            entity.ToTable("Participants");
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.ExternalId);
+            entity.Property(p => p.LdapUsername)
+                .HasMaxLength(100);
+            entity.Property(p => p.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(p => p.ExternalId)
+                .IsUnique()
+                .HasFilter("[ExternalId] IS NOT NULL");
+
+            entity.HasIndex(p => p.LdapUsername)
+                .IsUnique()
+                .HasFilter("[LdapUsername] IS NOT NULL");
+        });
+
+        modelBuilder.Entity<Participation>(entity =>
+        {
+            entity.ToTable("Participations");
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.SurveyId)
+                .IsRequired();
+            entity.Property(p => p.ParticipantId)
+                .IsRequired();
+            entity.Property(p => p.StartedAt)
+                .IsRequired();
+            entity.Property(p => p.CompletedAt);
+            entity.Property(p => p.IpAddress)
+                .HasMaxLength(50);
+
+            entity.HasOne(p => p.Participant)
+                .WithMany()
+                .HasForeignKey(p => p.ParticipantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<Survey>()
+                .WithMany()
+                .HasForeignKey(p => p.SurveyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(p => p.Answers)
+                .WithOne(a => a.Participation)
+                .HasForeignKey(a => a.ParticipationId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Answer>(entity =>
+        {
+            entity.ToTable("Answers");
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.ParticipationId)
+                .IsRequired();
+            entity.Property(a => a.QuestionId)
+                .IsRequired();
+            entity.Property(a => a.TextValue);
+
+            entity.HasOne(a => a.Question)
+                .WithMany()
+                .HasForeignKey(a => a.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(a => a.SelectedOptions)
+                .WithOne(ao => ao.Answer)
+                .HasForeignKey(ao => ao.AnswerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AnswerOption>(entity =>
+        {
+            entity.ToTable("AnswerOptions");
+            entity.HasKey(ao => ao.Id);
+            entity.Property(ao => ao.AnswerId)
+                .IsRequired();
+            entity.Property(ao => ao.QuestionOptionId)
+                .IsRequired();
+
+            entity.HasOne(ao => ao.QuestionOption)
+                .WithMany()
+                .HasForeignKey(ao => ao.QuestionOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
