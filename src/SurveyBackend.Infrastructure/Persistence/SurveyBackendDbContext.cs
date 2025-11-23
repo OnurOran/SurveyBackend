@@ -313,7 +313,7 @@ public class SurveyBackendDbContext : DbContext
             entity.HasOne(ao => ao.QuestionOption)
                 .WithMany()
                 .HasForeignKey(ao => ao.QuestionOptionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }
