@@ -53,8 +53,18 @@ public class Survey
         return new Survey(id, title.Trim(), description?.Trim(), createdBy.Trim(), accessType, createdAt, startDate, endDate);
     }
 
-    public void Publish()
+    public void Publish(DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
+        var effectiveStart = startDate ?? StartDate;
+        var effectiveEnd = endDate ?? EndDate;
+
+        if (effectiveStart.HasValue && effectiveEnd.HasValue && effectiveEnd <= effectiveStart)
+        {
+            throw new ArgumentException("EndDate must be later than StartDate when both are provided.", nameof(endDate));
+        }
+
+        StartDate = effectiveStart;
+        EndDate = effectiveEnd;
         IsActive = true;
     }
 
