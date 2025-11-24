@@ -5,6 +5,7 @@ using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Participations.Commands.CompleteParticipation;
 using SurveyBackend.Application.Participations.Commands.StartParticipation;
 using SurveyBackend.Application.Participations.Commands.SubmitAnswer;
+using SurveyBackend.Application.Participations.DTOs;
 
 namespace SurveyBackend.Api.Controllers;
 
@@ -22,7 +23,7 @@ public class ParticipationsController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("start")]
-    public async Task<ActionResult<Guid>> Start([FromBody] StartParticipationCommand command, CancellationToken cancellationToken)
+    public async Task<ActionResult<Guid>> Start([FromBody] StartParticipationRequest request, CancellationToken cancellationToken)
     {
         Guid? externalId = null;
 
@@ -43,17 +44,17 @@ public class ParticipationsController : ControllerBase
             externalId = cookieId;
         }
 
-        var commandWithExternal = command with { ExternalId = externalId };
-        var participationId = await _mediator.SendAsync<StartParticipationCommand, Guid>(commandWithExternal, cancellationToken);
+        var command = new StartParticipationCommand(request.SurveyId, externalId);
+        var participationId = await _mediator.SendAsync<StartParticipationCommand, Guid>(command, cancellationToken);
         return Ok(participationId);
     }
 
     [AllowAnonymous]
     [HttpPost("{id:guid}/answers")]
-    public async Task<IActionResult> SubmitAnswer(Guid id, [FromBody] SubmitAnswerCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> SubmitAnswer(Guid id, [FromBody] SubmitAnswerRequest request, CancellationToken cancellationToken)
     {
-        var enrichedCommand = command with { ParticipationId = id };
-        await _mediator.SendAsync<SubmitAnswerCommand, bool>(enrichedCommand, cancellationToken);
+        var command = new SubmitAnswerCommand(id, request.QuestionId, request.TextValue, request.OptionIds);
+        await _mediator.SendAsync<SubmitAnswerCommand, bool>(command, cancellationToken);
         return NoContent();
     }
 

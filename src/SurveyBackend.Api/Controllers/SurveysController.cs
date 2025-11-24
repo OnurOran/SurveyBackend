@@ -58,15 +58,15 @@ public class SurveysController : ControllerBase
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpPatch("{id:guid}/publish")]
-    public async Task<IActionResult> Publish(Guid id, [FromBody] PublishSurveyCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> Publish(Guid id, [FromBody] PublishSurveyRequest request, CancellationToken cancellationToken)
     {
-        if (command is null)
+        if (request is null)
         {
             return BadRequest("Geçersiz yayınlama isteği.");
         }
 
-        var publishCommand = command with { SurveyId = id };
-        await _mediator.SendAsync<PublishSurveyCommand, bool>(publishCommand, cancellationToken);
+        var command = new PublishSurveyCommand(id, request.StartDate, request.EndDate);
+        await _mediator.SendAsync<PublishSurveyCommand, bool>(command, cancellationToken);
         return NoContent();
     }
 }
