@@ -26,6 +26,7 @@ public class ParticipationsController : ControllerBase
     public async Task<ActionResult<Guid>> Start([FromBody] StartParticipationRequest request, CancellationToken cancellationToken)
     {
         Guid? externalId = null;
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
         if (!User.Identity?.IsAuthenticated ?? true)
         {
@@ -44,7 +45,10 @@ public class ParticipationsController : ControllerBase
             externalId = cookieId;
         }
 
-        var command = new StartParticipationCommand(request.SurveyId, externalId);
+        var command = new StartParticipationCommand(request.SurveyId, externalId)
+        {
+            IpAddress = ipAddress
+        };
         var participationId = await _mediator.SendAsync<StartParticipationCommand, Guid>(command, cancellationToken);
         return Ok(participationId);
     }

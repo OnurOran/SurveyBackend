@@ -82,7 +82,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             return existingParticipation.Id;
         }
 
-        var participation = Participation.Start(Guid.NewGuid(), survey.Id, participant.Id, now);
+        var participation = Participation.Start(Guid.NewGuid(), survey.Id, participant.Id, now, request.IpAddress);
 
         // Add participant if it's new (EF Core will handle this in a single transaction)
         if (isNewParticipant)
