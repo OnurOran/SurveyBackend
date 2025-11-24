@@ -106,13 +106,18 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         var tokenResult = await _jwtTokenService.GenerateTokensAsync(user, permissions, cancellationToken);
         var refreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt, now);
 
-        // Persist user if needed (EF Core handles transaction automatically)
+        // Persist user and refresh token (EF Core handles cascade insert automatically)
         if (persistUserOperation is not null)
         {
+            // This saves the User AND the new RefreshToken (cascade insert)
             await persistUserOperation(cancellationToken);
         }
-
-        await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
+        else
+        {
+            // If no user update was scheduled (e.g. Local Admin), we still need to save the new RefreshToken.
+            // Updating the User aggregate handles this.
+            await _userRepository.UpdateAsync(user, cancellationToken);
+        }
 
         var refreshTokenDto = AuthMapper.ToRefreshTokenDto(refreshToken);
         var authTokens = AuthMapper.ToAuthTokensDto(new TokenResult(tokenResult.AccessToken, refreshTokenDto.Token, tokenResult.AccessTokenExpiresInSeconds));

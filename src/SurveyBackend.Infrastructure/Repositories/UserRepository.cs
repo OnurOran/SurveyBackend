@@ -53,7 +53,27 @@ public sealed class UserRepository : IUserRepository
 
     public async Task UpdateAsync(User user, CancellationToken cancellationToken)
     {
-        _dbContext.Users.Update(user);
+        // EF Core has a known limitation: when adding new entities to tracked aggregate roots,
+        // it sometimes incorrectly marks them as Modified instead of Added.
+        // We must verify and correct the state before saving.
+
+        _dbContext.ChangeTracker.DetectChanges();
+
+        // Check only entities marked as Modified - verify they exist in database
+        var modifiedEntities = _dbContext.ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified)
+            .ToList();
+
+        foreach (var entry in modifiedEntities)
+        {
+            if (entry.Entity is RefreshToken token)
+            {
+                var exists = await _dbContext.RefreshTokens.AnyAsync(t => t.Id == token.Id, cancellationToken);
+                if (!exists)
+                    entry.State = EntityState.Added;
+            }
+        }
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

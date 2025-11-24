@@ -1,5 +1,5 @@
-using System.DirectoryServices;
-using System.Linq;
+using Microsoft.Extensions.Options;
+using Novell.Directory.Ldap;
 using SurveyBackend.Application.Common.Models;
 using SurveyBackend.Application.Interfaces.External;
 using SurveyBackend.Infrastructure.Configurations;
@@ -27,31 +27,46 @@ public sealed class LdapService : ILdapService
 
     private LdapUserInfo? AuthenticateInternal(string username, string password)
     {
+        using var cn = new LdapConnection();
+
         try
         {
-            using var entry = new DirectoryEntry(_settings.Path, $"{_settings.Domain}\\{username}", password);
-            using var searcher = new DirectorySearcher(entry)
-            {
-                Filter = $"(&({_settings.UsernameAttribute}={username})(objectClass=user))"
-            };
+            cn.Connect(_settings.Path, 389);
+            var bindDn = $"{username}@{_settings.Domain}";
+            cn.Bind(bindDn, password);
 
-            searcher.PropertiesToLoad.Add(_settings.UsernameAttribute);
-            searcher.PropertiesToLoad.Add(_settings.EmailAttribute);
-            searcher.PropertiesToLoad.Add(_settings.DepartmentAttribute);
-            searcher.PropertiesToLoad.Add("objectGuid");
+            var searchFilter = $"(&({_settings.UsernameAttribute}={username})(objectClass=user))";
+            var searchResults = cn.Search(
+                _settings.SearchBase,
+                2, // LdapConnection.ScopeSub = 2 (subtree search)
+                searchFilter,
+                new[] { _settings.EmailAttribute, _settings.DepartmentAttribute, "objectGuid" },
+                false);
 
-            var result = searcher.FindOne();
-            if (result is null)
+            if (searchResults.HasMore())
             {
-                return null;
+                var entry = searchResults.Next();
+                var email = entry.GetAttribute(_settings.EmailAttribute)?.StringValue ?? string.Empty;
+                var department = entry.GetAttribute(_settings.DepartmentAttribute)?.StringValue ?? string.Empty;
+
+                var userId = Guid.NewGuid();
+                try
+                {
+                    var guidAttr = entry.GetAttribute("objectGuid");
+                    if (guidAttr is not null)
+                    {
+                        userId = new Guid((byte[])(object)guidAttr.ByteValue);
+                    }
+                }
+                catch
+                {
+                    // ignore parsing errors and keep generated id
+                }
+
+                return new LdapUserInfo(userId, username, email, department);
             }
 
-            var email = result.Properties[_settings.EmailAttribute]?.Cast<object>().FirstOrDefault()?.ToString() ?? string.Empty;
-            var department = result.Properties[_settings.DepartmentAttribute]?.Cast<object>().FirstOrDefault()?.ToString() ?? string.Empty;
-            var objectGuid = result.Properties["objectGuid"]?.Cast<byte[]>().FirstOrDefault();
-            var userId = objectGuid is not null ? new Guid(objectGuid) : Guid.NewGuid();
-
-            return new LdapUserInfo(userId, username, email, department);
+            return null;
         }
         catch
         {
