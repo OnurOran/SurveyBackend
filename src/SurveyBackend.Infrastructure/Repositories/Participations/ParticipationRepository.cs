@@ -19,7 +19,6 @@ public sealed class ParticipationRepository : IParticipationRepository
         return await _dbContext.Participations
             .Include(p => p.Answers)
                 .ThenInclude(a => a.SelectedOptions)
-            .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
@@ -38,12 +37,33 @@ public sealed class ParticipationRepository : IParticipationRepository
 
     public async Task UpdateAsync(Participation participation, CancellationToken cancellationToken)
     {
-        if (_dbContext.Entry(participation).State == EntityState.Detached)
+        // EF Core has a known limitation: when adding new entities to tracked aggregate roots,
+        // it sometimes incorrectly marks them as Modified instead of Added.
+        // We must verify and correct the state before saving.
+
+        _dbContext.ChangeTracker.DetectChanges();
+
+        // Check only entities marked as Modified - verify they exist in database
+        var modifiedEntities = _dbContext.ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified)
+            .ToList();
+
+        foreach (var entry in modifiedEntities)
         {
-            _dbContext.Participations.Attach(participation);
+            if (entry.Entity is Answer answer)
+            {
+                var exists = await _dbContext.Answers.AnyAsync(a => a.Id == answer.Id, cancellationToken);
+                if (!exists)
+                    entry.State = EntityState.Added;
+            }
+            else if (entry.Entity is AnswerOption option)
+            {
+                var exists = await _dbContext.AnswerOptions.AnyAsync(ao => ao.Id == option.Id, cancellationToken);
+                if (!exists)
+                    entry.State = EntityState.Added;
+            }
         }
 
-        _dbContext.Participations.Update(participation);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

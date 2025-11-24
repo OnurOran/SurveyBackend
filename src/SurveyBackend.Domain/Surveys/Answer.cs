@@ -39,13 +39,23 @@ public class Answer
 
     public void ReplaceSelectedOptions(IEnumerable<Guid>? optionIds)
     {
-        SelectedOptions.Clear();
-        if (optionIds is null)
+        var newOptionIds = (optionIds ?? Enumerable.Empty<Guid>()).Distinct().ToList();
+
+        // Remove options that are no longer selected
+        var optionsToRemove = SelectedOptions
+            .Where(ao => !newOptionIds.Contains(ao.QuestionOptionId))
+            .ToList();
+
+        foreach (var option in optionsToRemove)
         {
-            return;
+            SelectedOptions.Remove(option);
         }
 
-        foreach (var optionId in optionIds.Distinct())
+        // Add new options that weren't previously selected
+        var existingOptionIds = SelectedOptions.Select(ao => ao.QuestionOptionId).ToHashSet();
+        var optionIdsToAdd = newOptionIds.Where(oid => !existingOptionIds.Contains(oid));
+
+        foreach (var optionId in optionIdsToAdd)
         {
             SelectedOptions.Add(new AnswerOption(Guid.NewGuid(), Id, optionId));
         }

@@ -5,12 +5,10 @@ namespace SurveyBackend.Application.Participations.Commands.CompleteParticipatio
 public sealed class CompleteParticipationCommandHandler : ICommandHandler<CompleteParticipationCommand, bool>
 {
     private readonly IParticipationRepository _participationRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public CompleteParticipationCommandHandler(IParticipationRepository participationRepository, IUnitOfWork unitOfWork)
+    public CompleteParticipationCommandHandler(IParticipationRepository participationRepository)
     {
         _participationRepository = participationRepository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> HandleAsync(CompleteParticipationCommand request, CancellationToken cancellationToken)
@@ -20,7 +18,7 @@ public sealed class CompleteParticipationCommandHandler : ICommandHandler<Comple
 
         participation.Complete(DateTimeOffset.UtcNow);
 
-        await _unitOfWork.ExecuteAsync(ct => _participationRepository.UpdateAsync(participation, ct), cancellationToken);
+        await _participationRepository.UpdateAsync(participation, cancellationToken);
         return true;
     }
 }

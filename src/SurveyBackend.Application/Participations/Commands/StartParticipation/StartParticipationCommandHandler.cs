@@ -9,20 +9,17 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
     private readonly ISurveyRepository _surveyRepository;
     private readonly IParticipantRepository _participantRepository;
     private readonly IParticipationRepository _participationRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
 
     public StartParticipationCommandHandler(
         ISurveyRepository surveyRepository,
         IParticipantRepository participantRepository,
         IParticipationRepository participationRepository,
-        IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService)
     {
         _surveyRepository = surveyRepository;
         _participantRepository = participantRepository;
         _participationRepository = participationRepository;
-        _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
     }
 
@@ -87,15 +84,13 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
 
         var participation = Participation.Start(Guid.NewGuid(), survey.Id, participant.Id, now);
 
-        await _unitOfWork.ExecuteAsync(async ct =>
+        // Add participant if it's new (EF Core will handle this in a single transaction)
+        if (isNewParticipant)
         {
-            if (isNewParticipant)
-            {
-                await _participantRepository.AddAsync(participant, ct);
-            }
+            await _participantRepository.AddAsync(participant, cancellationToken);
+        }
 
-            await _participationRepository.AddAsync(participation, ct);
-        }, cancellationToken);
+        await _participationRepository.AddAsync(participation, cancellationToken);
 
         return participation.Id;
     }

@@ -7,16 +7,13 @@ namespace SurveyBackend.Application.Surveys.Commands.Create;
 public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCommand, Guid>
 {
     private readonly ISurveyRepository _surveyRepository;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
 
     public CreateSurveyCommandHandler(
         ISurveyRepository surveyRepository,
-        IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService)
     {
         _surveyRepository = surveyRepository;
-        _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
     }
 
@@ -49,10 +46,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
             }
         }
 
-        await _unitOfWork.ExecuteAsync(async ct =>
-        {
-            await _surveyRepository.AddAsync(survey, ct);
-        }, cancellationToken);
+        await _surveyRepository.AddAsync(survey, cancellationToken);
 
         return survey.Id;
     }

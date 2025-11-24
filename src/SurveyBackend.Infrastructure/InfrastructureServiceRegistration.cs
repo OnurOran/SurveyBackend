@@ -37,7 +37,6 @@ public static class InfrastructureServiceRegistration
         services.AddScoped<ISurveyRepository, SurveyRepository>();
         services.AddScoped<IParticipantRepository, ParticipantRepository>();
         services.AddScoped<IParticipationRepository, ParticipationRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IDepartmentRepository, DepartmentRepository>();
         services.AddScoped<ILdapService, LdapService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();

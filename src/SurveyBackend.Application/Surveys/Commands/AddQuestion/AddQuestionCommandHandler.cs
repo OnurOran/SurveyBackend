@@ -5,12 +5,10 @@ namespace SurveyBackend.Application.Surveys.Commands.AddQuestion;
 public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionCommand, Guid>
 {
     private readonly ISurveyRepository _surveyRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public AddQuestionCommandHandler(ISurveyRepository surveyRepository, IUnitOfWork unitOfWork)
+    public AddQuestionCommandHandler(ISurveyRepository surveyRepository)
     {
         _surveyRepository = surveyRepository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> HandleAsync(AddQuestionCommand request, CancellationToken cancellationToken)
@@ -29,7 +27,7 @@ public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionComma
             }
         }
 
-        await _unitOfWork.ExecuteAsync(ct => _surveyRepository.UpdateAsync(survey, ct), cancellationToken);
+        await _surveyRepository.UpdateAsync(survey, cancellationToken);
         return question.Id;
     }
 }

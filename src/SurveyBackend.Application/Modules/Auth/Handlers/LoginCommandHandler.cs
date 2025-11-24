@@ -21,7 +21,6 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
     private readonly IPasswordHasher _passwordHasher;
     private readonly IPermissionRepository _permissionRepository;
     private readonly IUserRoleRepository _userRoleRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
     public LoginCommandHandler(
         ILdapService ldapService,
@@ -31,8 +30,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         IJwtTokenService jwtTokenService,
         IPasswordHasher passwordHasher,
         IPermissionRepository permissionRepository,
-        IUserRoleRepository userRoleRepository,
-        IUnitOfWork unitOfWork)
+        IUserRoleRepository userRoleRepository)
     {
         _ldapService = ldapService;
         _departmentRepository = departmentRepository;
@@ -42,7 +40,6 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         _passwordHasher = passwordHasher;
         _permissionRepository = permissionRepository;
         _userRoleRepository = userRoleRepository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task<AuthTokensDto> HandleAsync(LoginCommand request, CancellationToken cancellationToken)
@@ -108,15 +105,14 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         var permissions = await ResolvePermissionsAsync(user, cancellationToken);
         var tokenResult = await _jwtTokenService.GenerateTokensAsync(user, permissions, cancellationToken);
         var refreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt, now);
-        await _unitOfWork.ExecuteAsync(async ct =>
-        {
-            if (persistUserOperation is not null)
-            {
-                await persistUserOperation(ct);
-            }
 
-            await _refreshTokenRepository.AddAsync(refreshToken, ct);
-        }, cancellationToken);
+        // Persist user if needed (EF Core handles transaction automatically)
+        if (persistUserOperation is not null)
+        {
+            await persistUserOperation(cancellationToken);
+        }
+
+        await _refreshTokenRepository.AddAsync(refreshToken, cancellationToken);
 
         var refreshTokenDto = AuthMapper.ToRefreshTokenDto(refreshToken);
         var authTokens = AuthMapper.ToAuthTokensDto(new TokenResult(tokenResult.AccessToken, refreshTokenDto.Token, tokenResult.AccessTokenExpiresInSeconds));

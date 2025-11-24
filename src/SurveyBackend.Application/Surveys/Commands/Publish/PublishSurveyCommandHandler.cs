@@ -5,12 +5,10 @@ namespace SurveyBackend.Application.Surveys.Commands.Publish;
 public sealed class PublishSurveyCommandHandler : ICommandHandler<PublishSurveyCommand, bool>
 {
     private readonly ISurveyRepository _surveyRepository;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public PublishSurveyCommandHandler(ISurveyRepository surveyRepository, IUnitOfWork unitOfWork)
+    public PublishSurveyCommandHandler(ISurveyRepository surveyRepository)
     {
         _surveyRepository = surveyRepository;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> HandleAsync(PublishSurveyCommand request, CancellationToken cancellationToken)
@@ -20,7 +18,7 @@ public sealed class PublishSurveyCommandHandler : ICommandHandler<PublishSurveyC
 
         survey.Publish(request.StartDate, request.EndDate);
 
-        await _unitOfWork.ExecuteAsync(ct => _surveyRepository.UpdateAsync(survey, ct), cancellationToken);
+        await _surveyRepository.UpdateAsync(survey, cancellationToken);
         return true;
     }
 }
