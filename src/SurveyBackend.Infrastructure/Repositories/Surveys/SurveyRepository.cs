@@ -41,8 +41,14 @@ public sealed class SurveyRepository : ISurveyRepository
     public async Task<Survey?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Surveys
+            .Include(s => s.Attachment)
             .Include(s => s.Questions)
                 .ThenInclude(q => q.Options)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.Attachment)
             .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }

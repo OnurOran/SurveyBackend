@@ -9,7 +9,8 @@ public sealed record SurveyDetailDto(
     AccessType AccessType,
     DateTimeOffset? StartDate,
     DateTimeOffset? EndDate,
-    IReadOnlyCollection<SurveyQuestionDetailDto> Questions);
+    IReadOnlyCollection<SurveyQuestionDetailDto> Questions,
+    AttachmentDto? Attachment = null);
 
 public sealed record SurveyQuestionDetailDto(
     Guid Id,
@@ -18,6 +19,8 @@ public sealed record SurveyQuestionDetailDto(
     QuestionType Type,
     int Order,
     bool IsRequired,
-    IReadOnlyCollection<SurveyOptionDetailDto> Options);
+    IReadOnlyCollection<SurveyOptionDetailDto> Options,
+    AttachmentDto? Attachment = null,
+    IReadOnlyCollection<string>? AllowedAttachmentContentTypes = null);
 
-public sealed record SurveyOptionDetailDto(Guid Id, string Text, int Order, int? Value);
+public sealed record SurveyOptionDetailDto(Guid Id, string Text, int Order, int? Value, AttachmentDto? Attachment = null);

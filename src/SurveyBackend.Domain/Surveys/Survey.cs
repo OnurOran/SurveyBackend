@@ -15,6 +15,7 @@ public class Survey
     public DateTimeOffset? StartDate { get; private set; }
     public DateTimeOffset? EndDate { get; private set; }
 
+    public Attachment? Attachment { get; private set; }
     public ICollection<Question> Questions { get; private set; } = new List<Question>();
 
     private Survey()

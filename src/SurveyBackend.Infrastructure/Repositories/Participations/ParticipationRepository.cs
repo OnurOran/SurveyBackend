@@ -19,6 +19,8 @@ public sealed class ParticipationRepository : IParticipationRepository
         return await _dbContext.Participations
             .Include(p => p.Answers)
                 .ThenInclude(a => a.SelectedOptions)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.Attachment)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 

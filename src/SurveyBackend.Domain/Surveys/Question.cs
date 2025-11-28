@@ -11,8 +11,10 @@ public class Question
     public int Order { get; private set; }
     public QuestionType Type { get; private set; }
     public bool IsRequired { get; private set; }
+    public string? AllowedAttachmentContentTypes { get; private set; }
 
     public Survey Survey { get; private set; } = null!;
+    public Attachment? Attachment { get; private set; }
     public ICollection<QuestionOption> Options { get; private set; } = new List<QuestionOption>();
 
     private Question()
@@ -38,6 +40,32 @@ public class Question
         }
 
         return new Question(id, surveyId, text.Trim(), order, type, isRequired, description?.Trim());
+    }
+
+    public void SetAllowedAttachmentContentTypes(IEnumerable<string>? contentTypes)
+    {
+        var list = contentTypes?
+            .Where(ct => !string.IsNullOrWhiteSpace(ct))
+            .Select(ct => ct.Trim())
+            .Where(ct => ct.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        AllowedAttachmentContentTypes = list is { Count: > 0 }
+            ? string.Join(',', list)
+            : null;
+    }
+
+    public IReadOnlyCollection<string> GetAllowedAttachmentContentTypes()
+    {
+        if (string.IsNullOrWhiteSpace(AllowedAttachmentContentTypes))
+        {
+            return Array.Empty<string>();
+        }
+
+        return AllowedAttachmentContentTypes
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToArray();
     }
 
     public QuestionOption AddOption(Guid id, string text, int order, int? value = null)

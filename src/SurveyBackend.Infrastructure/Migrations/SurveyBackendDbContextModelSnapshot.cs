@@ -127,6 +127,50 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.ToTable("Answers", (string)null);
                 });
 
+            modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AnswerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<Guid>("SurveyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId")
+                        .IsUnique();
+
+                    b.ToTable("AnswerAttachments", (string)null);
+                });
+
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerOption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -146,6 +190,68 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.HasIndex("QuestionOptionId");
 
                     b.ToTable("AnswerOptions", (string)null);
+                });
+
+            modelBuilder.Entity("SurveyBackend.Domain.Surveys.Attachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<int>("OwnerType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("QuestionOptionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<Guid?>("SurveyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId")
+                        .IsUnique()
+                        .HasFilter("[QuestionId] IS NOT NULL");
+
+                    b.HasIndex("QuestionOptionId")
+                        .IsUnique()
+                        .HasFilter("[QuestionOptionId] IS NOT NULL");
+
+                    b.HasIndex("SurveyId")
+                        .IsUnique()
+                        .HasFilter("[SurveyId] IS NOT NULL");
+
+                    b.ToTable("Attachments", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Attachments_SingleOwner", "\n                (\n                    (CASE WHEN SurveyId IS NOT NULL THEN 1 ELSE 0 END) +\n                    (CASE WHEN QuestionId IS NOT NULL THEN 1 ELSE 0 END) +\n                    (CASE WHEN QuestionOptionId IS NOT NULL THEN 1 ELSE 0 END)\n                ) = 1");
+                        });
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.DependentQuestion", b =>
@@ -234,6 +340,10 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AllowedAttachmentContentTypes")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -467,6 +577,17 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerAttachment", b =>
+                {
+                    b.HasOne("SurveyBackend.Domain.Surveys.Answer", "Answer")
+                        .WithOne("Attachment")
+                        .HasForeignKey("SurveyBackend.Domain.Surveys.AnswerAttachment", "AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Answer");
+                });
+
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerOption", b =>
                 {
                     b.HasOne("SurveyBackend.Domain.Surveys.Answer", "Answer")
@@ -484,6 +605,30 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Navigation("Answer");
 
                     b.Navigation("QuestionOption");
+                });
+
+            modelBuilder.Entity("SurveyBackend.Domain.Surveys.Attachment", b =>
+                {
+                    b.HasOne("SurveyBackend.Domain.Surveys.Question", "Question")
+                        .WithOne("Attachment")
+                        .HasForeignKey("SurveyBackend.Domain.Surveys.Attachment", "QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SurveyBackend.Domain.Surveys.QuestionOption", "QuestionOption")
+                        .WithOne("Attachment")
+                        .HasForeignKey("SurveyBackend.Domain.Surveys.Attachment", "QuestionOptionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SurveyBackend.Domain.Surveys.Survey", "Survey")
+                        .WithOne("Attachment")
+                        .HasForeignKey("SurveyBackend.Domain.Surveys.Attachment", "SurveyId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuestionOption");
+
+                    b.Navigation("Survey");
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.DependentQuestion", b =>
@@ -607,6 +752,8 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Answer", b =>
                 {
+                    b.Navigation("Attachment");
+
                     b.Navigation("SelectedOptions");
                 });
 
@@ -617,16 +764,22 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Question", b =>
                 {
+                    b.Navigation("Attachment");
+
                     b.Navigation("Options");
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.QuestionOption", b =>
                 {
+                    b.Navigation("Attachment");
+
                     b.Navigation("DependentQuestions");
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Survey", b =>
                 {
+                    b.Navigation("Attachment");
+
                     b.Navigation("Questions");
                 });
 

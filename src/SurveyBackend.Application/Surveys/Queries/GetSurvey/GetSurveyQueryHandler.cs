@@ -37,8 +37,10 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
                 q.IsRequired,
                 q.Options
                     .OrderBy(o => o.Order)
-                    .Select(o => new SurveyOptionDetailDto(o.Id, o.Text, o.Order, o.Value))
-                    .ToList()))
+                    .Select(o => new SurveyOptionDetailDto(o.Id, o.Text, o.Order, o.Value, MapAttachment(o.Attachment)))
+                    .ToList(),
+                MapAttachment(q.Attachment),
+                q.GetAllowedAttachmentContentTypes()))
             .ToList();
 
         return new SurveyDetailDto(
@@ -48,7 +50,8 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
             survey.AccessType,
             survey.StartDate,
             survey.EndDate,
-            questions);
+            questions,
+            MapAttachment(survey.Attachment));
     }
 
     private static bool IsAvailable(Survey survey)
@@ -71,5 +74,15 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
         }
 
         return true;
+    }
+
+    private static AttachmentDto? MapAttachment(Domain.Surveys.Attachment? attachment)
+    {
+        if (attachment is null)
+        {
+            return null;
+        }
+
+        return new AttachmentDto(attachment.Id, attachment.FileName, attachment.ContentType, attachment.SizeBytes);
     }
 }

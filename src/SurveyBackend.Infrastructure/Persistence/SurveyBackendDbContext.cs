@@ -29,6 +29,8 @@ public class SurveyBackendDbContext : DbContext
     public DbSet<Participation> Participations => Set<Participation>();
     public DbSet<Answer> Answers => Set<Answer>();
     public DbSet<AnswerOption> AnswerOptions => Set<AnswerOption>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<AnswerAttachment> AnswerAttachments => Set<AnswerAttachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -194,6 +196,8 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired();
             entity.Property(q => q.IsRequired)
                 .IsRequired();
+            entity.Property(q => q.AllowedAttachmentContentTypes)
+                .HasMaxLength(512);
 
             entity.HasMany(q => q.Options)
                 .WithOne(o => o.Question)
@@ -221,6 +225,10 @@ public class SurveyBackendDbContext : DbContext
                 .WithOne(dq => dq.ParentOption)
                 .HasForeignKey(dq => dq.ParentQuestionOptionId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(qo => qo.Attachment)
+                .WithOne(a => a.QuestionOption)
+                .HasForeignKey<Attachment>(a => a.QuestionOptionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<DependentQuestion>(entity =>
@@ -320,6 +328,94 @@ public class SurveyBackendDbContext : DbContext
             entity.HasOne(ao => ao.QuestionOption)
                 .WithMany()
                 .HasForeignKey(ao => ao.QuestionOptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AnswerAttachment>(entity =>
+        {
+            entity.ToTable("AnswerAttachments");
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.FileName)
+                .IsRequired()
+                .HasMaxLength(512);
+            entity.Property(a => a.ContentType)
+                .IsRequired()
+                .HasMaxLength(256);
+            entity.Property(a => a.StoragePath)
+                .IsRequired()
+                .HasMaxLength(1024);
+            entity.Property(a => a.SizeBytes)
+                .IsRequired();
+            entity.Property(a => a.CreatedAt)
+                .IsRequired();
+            entity.Property(a => a.SurveyId)
+                .IsRequired();
+            entity.Property(a => a.DepartmentId)
+                .IsRequired();
+
+            entity.HasIndex(a => a.AnswerId)
+                .IsUnique();
+
+            entity.HasOne(a => a.Answer)
+                .WithOne(ans => ans.Attachment)
+                .HasForeignKey<AnswerAttachment>(a => a.AnswerId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Attachment>(entity =>
+        {
+            entity.ToTable("Attachments", tableBuilder =>
+            {
+                tableBuilder.HasCheckConstraint("CK_Attachments_SingleOwner", @"
+                (
+                    (CASE WHEN SurveyId IS NOT NULL THEN 1 ELSE 0 END) +
+                    (CASE WHEN QuestionId IS NOT NULL THEN 1 ELSE 0 END) +
+                    (CASE WHEN QuestionOptionId IS NOT NULL THEN 1 ELSE 0 END)
+                ) = 1");
+            });
+
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.OwnerType)
+                .IsRequired();
+            entity.Property(a => a.DepartmentId)
+                .IsRequired();
+            entity.Property(a => a.FileName)
+                .IsRequired()
+                .HasMaxLength(512);
+            entity.Property(a => a.ContentType)
+                .IsRequired()
+                .HasMaxLength(256);
+            entity.Property(a => a.StoragePath)
+                .IsRequired()
+                .HasMaxLength(1024);
+            entity.Property(a => a.SizeBytes)
+                .IsRequired();
+            entity.Property(a => a.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(a => a.SurveyId)
+                .IsUnique()
+                .HasFilter("[SurveyId] IS NOT NULL");
+            entity.HasIndex(a => a.QuestionId)
+                .IsUnique()
+                .HasFilter("[QuestionId] IS NOT NULL");
+            entity.HasIndex(a => a.QuestionOptionId)
+                .IsUnique()
+                .HasFilter("[QuestionOptionId] IS NOT NULL");
+
+            entity.HasOne(a => a.Survey)
+                .WithOne(s => s.Attachment)
+                .HasForeignKey<Attachment>(a => a.SurveyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(a => a.Question)
+                .WithOne(q => q.Attachment)
+                .HasForeignKey<Attachment>(a => a.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(a => a.QuestionOption)
+                .WithOne(qo => qo.Attachment)
+                .HasForeignKey<Attachment>(a => a.QuestionOptionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

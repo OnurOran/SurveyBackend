@@ -16,5 +16,6 @@ public enum QuestionType
 {
     SingleSelect,
     MultiSelect,
-    OpenText
+    OpenText,
+    FileUpload
 }

@@ -9,6 +9,7 @@ public class QuestionOption
     public int? Value { get; private set; }
 
     public Question Question { get; private set; } = null!;
+    public Attachment? Attachment { get; private set; }
     public ICollection<DependentQuestion> DependentQuestions { get; private set; } = new List<DependentQuestion>();
 
     private QuestionOption()

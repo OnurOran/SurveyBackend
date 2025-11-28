@@ -57,7 +57,7 @@ public class ParticipationsController : ControllerBase
     [HttpPost("{id:guid}/answers")]
     public async Task<IActionResult> SubmitAnswer(Guid id, [FromBody] SubmitAnswerRequest request, CancellationToken cancellationToken)
     {
-        var command = new SubmitAnswerCommand(id, request.QuestionId, request.TextValue, request.OptionIds);
+        var command = new SubmitAnswerCommand(id, request.QuestionId, request.TextValue, request.OptionIds, request.Attachment);
         await _mediator.SendAsync<SubmitAnswerCommand, bool>(command, cancellationToken);
         return NoContent();
     }

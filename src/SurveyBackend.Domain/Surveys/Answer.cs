@@ -11,6 +11,7 @@ public class Answer
 
     public Participation Participation { get; private set; } = null!;
     public Question Question { get; private set; } = null!;
+    public AnswerAttachment? Attachment { get; private set; }
     public ICollection<AnswerOption> SelectedOptions { get; private set; } = new List<AnswerOption>();
 
     private Answer()

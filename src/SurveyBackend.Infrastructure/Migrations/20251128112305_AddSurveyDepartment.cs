@@ -176,7 +176,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Order = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    IsRequired = table.Column<bool>(type: "bit", nullable: false)
+                    IsRequired = table.Column<bool>(type: "bit", nullable: false),
+                    AllowedAttachmentContentTypes = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -290,6 +291,31 @@ namespace SurveyBackend.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AnswerAttachments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AnswerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SurveyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    StoragePath = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnswerAttachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnswerAttachments_Answers_AnswerId",
+                        column: x => x.AnswerId,
+                        principalTable: "Answers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AnswerOptions",
                 columns: table => new
                 {
@@ -312,6 +338,46 @@ namespace SurveyBackend.Infrastructure.Migrations
                         principalTable: "QuestionOptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OwnerType = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SurveyId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    QuestionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    QuestionOptionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    SizeBytes = table.Column<long>(type: "bigint", nullable: false),
+                    StoragePath = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.CheckConstraint("CK_Attachments_SingleOwner", "\n                (\n                    (CASE WHEN SurveyId IS NOT NULL THEN 1 ELSE 0 END) +\n                    (CASE WHEN QuestionId IS NOT NULL THEN 1 ELSE 0 END) +\n                    (CASE WHEN QuestionOptionId IS NOT NULL THEN 1 ELSE 0 END)\n                ) = 1");
+                    table.ForeignKey(
+                        name: "FK_Attachments_QuestionOptions_QuestionOptionId",
+                        column: x => x.QuestionOptionId,
+                        principalTable: "QuestionOptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Questions_QuestionId",
+                        column: x => x.QuestionId,
+                        principalTable: "Questions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Attachments_Surveys_SurveyId",
+                        column: x => x.SurveyId,
+                        principalTable: "Surveys",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -340,6 +406,12 @@ namespace SurveyBackend.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AnswerAttachments_AnswerId",
+                table: "AnswerAttachments",
+                column: "AnswerId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AnswerOptions_AnswerId",
                 table: "AnswerOptions",
                 column: "AnswerId");
@@ -358,6 +430,27 @@ namespace SurveyBackend.Infrastructure.Migrations
                 name: "IX_Answers_QuestionId",
                 table: "Answers",
                 column: "QuestionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attachments_QuestionId",
+                table: "Attachments",
+                column: "QuestionId",
+                unique: true,
+                filter: "[QuestionId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attachments_QuestionOptionId",
+                table: "Attachments",
+                column: "QuestionOptionId",
+                unique: true,
+                filter: "[QuestionOptionId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attachments_SurveyId",
+                table: "Attachments",
+                column: "SurveyId",
+                unique: true,
+                filter: "[SurveyId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Departments_ExternalIdentifier",
@@ -450,7 +543,13 @@ namespace SurveyBackend.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AnswerAttachments");
+
+            migrationBuilder.DropTable(
                 name: "AnswerOptions");
+
+            migrationBuilder.DropTable(
+                name: "Attachments");
 
             migrationBuilder.DropTable(
                 name: "DependentQuestions");
