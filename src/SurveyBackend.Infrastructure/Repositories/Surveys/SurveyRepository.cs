@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SurveyBackend.Application.Interfaces.Persistence;
+using SurveyBackend.Application.Surveys.DTOs;
 using SurveyBackend.Domain.Surveys;
 using SurveyBackend.Infrastructure.Persistence;
 
@@ -20,6 +21,23 @@ public sealed class SurveyRepository : ISurveyRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Survey>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _dbContext.Surveys
+            .AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Survey>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Surveys
+            .AsNoTracking()
+            .Where(s => s.DepartmentId == departmentId)
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<Survey?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Surveys
@@ -27,6 +45,49 @@ public sealed class SurveyRepository : ISurveyRepository
                 .ThenInclude(q => q.Options)
             .AsSplitQuery()
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsAsync(CancellationToken cancellationToken)
+    {
+        var data = await _dbContext.Surveys
+            .AsNoTracking()
+            .Select(s => new
+            {
+                s.Id,
+                s.Title,
+                s.DepartmentId,
+                s.IsActive,
+                s.CreatedAt,
+                ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
+            })
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return data
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.ParticipationCount))
+            .ToList();
+    }
+
+    public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    {
+        var data = await _dbContext.Surveys
+            .AsNoTracking()
+            .Where(s => s.DepartmentId == departmentId)
+            .Select(s => new
+            {
+                s.Id,
+                s.Title,
+                s.DepartmentId,
+                s.IsActive,
+                s.CreatedAt,
+                ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
+            })
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync(cancellationToken);
+
+        return data
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.ParticipationCount))
+            .ToList();
     }
 
     public async Task UpdateAsync(Survey survey, CancellationToken cancellationToken)

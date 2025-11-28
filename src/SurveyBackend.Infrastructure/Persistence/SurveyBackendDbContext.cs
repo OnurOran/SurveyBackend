@@ -156,6 +156,8 @@ public class SurveyBackendDbContext : DbContext
             entity.Property(s => s.CreatedBy)
                 .IsRequired()
                 .HasMaxLength(100);
+            entity.Property(s => s.DepartmentId)
+                .IsRequired();
             entity.Property(s => s.CreatedAt)
                 .IsRequired();
             entity.Property(s => s.AccessType)
@@ -165,6 +167,11 @@ public class SurveyBackendDbContext : DbContext
                 .HasDefaultValue(false);
             entity.Property(s => s.StartDate);
             entity.Property(s => s.EndDate);
+
+            entity.HasOne<Department>()
+                .WithMany()
+                .HasForeignKey(s => s.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasMany(s => s.Questions)
                 .WithOne(q => q.Survey)

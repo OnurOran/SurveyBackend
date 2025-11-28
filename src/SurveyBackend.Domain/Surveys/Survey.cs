@@ -8,6 +8,7 @@ public class Survey
     public string Title { get; private set; } = null!;
     public string? Description { get; private set; }
     public string CreatedBy { get; private set; } = null!;
+    public Guid DepartmentId { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public bool IsActive { get; private set; }
     public AccessType AccessType { get; private set; }
@@ -20,12 +21,13 @@ public class Survey
     {
     }
 
-    private Survey(Guid id, string title, string? description, string createdBy, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate, DateTimeOffset? endDate)
+    private Survey(Guid id, string title, string? description, string createdBy, Guid departmentId, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate, DateTimeOffset? endDate)
     {
         Id = id;
         Title = title;
         Description = description;
         CreatedBy = createdBy;
+        DepartmentId = departmentId;
         AccessType = accessType;
         CreatedAt = createdAt;
         StartDate = startDate;
@@ -33,7 +35,7 @@ public class Survey
         IsActive = false;
     }
 
-    public static Survey Create(Guid id, string title, string? description, string createdBy, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
+    public static Survey Create(Guid id, string title, string? description, string createdBy, Guid departmentId, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -45,12 +47,17 @@ public class Survey
             throw new ArgumentException("CreatedBy cannot be empty.", nameof(createdBy));
         }
 
+        if (departmentId == Guid.Empty)
+        {
+            throw new ArgumentException("DepartmentId cannot be empty.", nameof(departmentId));
+        }
+
         if (startDate.HasValue && endDate.HasValue && endDate <= startDate)
         {
             throw new ArgumentException("EndDate must be later than StartDate when both are provided.", nameof(endDate));
         }
 
-        return new Survey(id, title.Trim(), description?.Trim(), createdBy.Trim(), accessType, createdAt, startDate, endDate);
+        return new Survey(id, title.Trim(), description?.Trim(), createdBy.Trim(), departmentId, accessType, createdAt, startDate, endDate);
     }
 
     public void Publish(DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)

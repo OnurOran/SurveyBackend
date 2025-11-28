@@ -8,13 +8,16 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 {
     private readonly ISurveyRepository _surveyRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IAuthorizationService _authorizationService;
 
     public CreateSurveyCommandHandler(
         ISurveyRepository surveyRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IAuthorizationService authorizationService)
     {
         _surveyRepository = surveyRepository;
         _currentUserService = currentUserService;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Guid> HandleAsync(CreateSurveyCommand request, CancellationToken cancellationToken)
@@ -26,8 +29,12 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 
         var creator = _currentUserService.UserId.Value.ToString();
         var now = DateTimeOffset.UtcNow;
+        var departmentId = _currentUserService.DepartmentId
+            ?? throw new UnauthorizedAccessException("Kullanıcının departman bilgisi bulunamadı.");
 
-        var survey = Survey.Create(Guid.NewGuid(), request.Title, request.Description, creator, request.AccessType, now);
+        await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
+
+        var survey = Survey.Create(Guid.NewGuid(), request.Title, request.Description, creator, departmentId, request.AccessType, now);
 
         if (request.Questions is not null)
         {

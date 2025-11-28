@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SurveyBackend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSurveySchema : Migration
+    public partial class AddSurveyDepartment : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -72,6 +72,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     AccessType = table.Column<int>(type: "int", nullable: false),
@@ -81,6 +82,12 @@ namespace SurveyBackend.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Surveys", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Surveys_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -408,6 +415,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                 column: "PermissionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Surveys_DepartmentId",
+                table: "Surveys",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRefreshTokens_Token",
                 table: "UserRefreshTokens",
                 column: "Token",
@@ -474,13 +486,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                 name: "Questions");
 
             migrationBuilder.DropTable(
-                name: "Departments");
-
-            migrationBuilder.DropTable(
                 name: "Participants");
 
             migrationBuilder.DropTable(
                 name: "Surveys");
+
+            migrationBuilder.DropTable(
+                name: "Departments");
         }
     }
 }
