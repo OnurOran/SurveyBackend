@@ -48,7 +48,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
-        var survey = Survey.Create(Guid.NewGuid(), request.Title, request.Description, creator, departmentId, request.AccessType, now);
+        var survey = Survey.Create(Guid.NewGuid(), request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, creator, departmentId, request.AccessType, now);
 
         var questionAttachmentQueue = new List<(Question Question, AttachmentUploadDto Attachment)>();
         var optionAttachmentQueue = new List<(QuestionOption Option, AttachmentUploadDto Attachment)>();

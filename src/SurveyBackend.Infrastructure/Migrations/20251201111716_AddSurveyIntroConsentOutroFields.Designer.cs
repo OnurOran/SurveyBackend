@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SurveyBackend.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using SurveyBackend.Infrastructure.Persistence;
 namespace SurveyBackend.Infrastructure.Migrations
 {
     [DbContext(typeof(SurveyBackendDbContext))]
-    partial class SurveyBackendDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251201111716_AddSurveyIntroConsentOutroFields")]
+    partial class AddSurveyIntroConsentOutroFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -440,6 +443,9 @@ namespace SurveyBackend.Infrastructure.Migrations
 
                     b.Property<string>("OutroText")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RequireConsent")
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset?>("StartDate")
                         .HasColumnType("datetimeoffset");
