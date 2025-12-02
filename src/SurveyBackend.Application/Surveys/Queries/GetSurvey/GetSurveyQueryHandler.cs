@@ -26,21 +26,18 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
             return null;
         }
 
+        // Collect all child question IDs to filter them from main question list
+        var childQuestionIds = survey.Questions
+            .SelectMany(q => q.Options)
+            .SelectMany(o => o.DependentQuestions)
+            .Select(dq => dq.ChildQuestionId)
+            .ToHashSet();
+
+        // Map questions, excluding child questions from main list
         var questions = survey.Questions
+            .Where(q => !childQuestionIds.Contains(q.Id))
             .OrderBy(q => q.Order)
-            .Select(q => new SurveyQuestionDetailDto(
-                q.Id,
-                q.Text,
-                q.Description,
-                q.Type,
-                q.Order,
-                q.IsRequired,
-                q.Options
-                    .OrderBy(o => o.Order)
-                    .Select(o => new SurveyOptionDetailDto(o.Id, o.Text, o.Order, o.Value, MapAttachment(o.Attachment)))
-                    .ToList(),
-                MapAttachment(q.Attachment),
-                q.GetAllowedAttachmentContentTypes()))
+            .Select(q => MapQuestion(q, survey))
             .ToList();
 
         return new SurveyDetailDto(
@@ -77,6 +74,71 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
         }
 
         return true;
+    }
+
+    private static SurveyQuestionDetailDto MapQuestion(Question question, Survey survey)
+    {
+        var options = question.Options
+            .OrderBy(o => o.Order)
+            .Select(o => MapOption(o, survey))
+            .ToList();
+
+        return new SurveyQuestionDetailDto(
+            question.Id,
+            question.Text,
+            question.Description,
+            question.Type,
+            question.Order,
+            question.IsRequired,
+            options,
+            MapAttachment(question.Attachment),
+            question.GetAllowedAttachmentContentTypes());
+    }
+
+    private static SurveyOptionDetailDto MapOption(QuestionOption option, Survey survey)
+    {
+        // For conditional questions, load child questions
+        IReadOnlyCollection<SurveyQuestionDetailDto>? childQuestions = null;
+        if (option.DependentQuestions.Any())
+        {
+            childQuestions = option.DependentQuestions
+                .OrderBy(dq => dq.ChildQuestion.Order)
+                .Select(dq => MapChildQuestion(dq.ChildQuestion))
+                .ToList();
+        }
+
+        return new SurveyOptionDetailDto(
+            option.Id,
+            option.Text,
+            option.Order,
+            option.Value,
+            MapAttachment(option.Attachment),
+            childQuestions);
+    }
+
+    private static SurveyQuestionDetailDto MapChildQuestion(Question question)
+    {
+        var options = question.Options
+            .OrderBy(o => o.Order)
+            .Select(o => new SurveyOptionDetailDto(
+                o.Id,
+                o.Text,
+                o.Order,
+                o.Value,
+                MapAttachment(o.Attachment),
+                null)) // Child questions cannot have their own child questions
+            .ToList();
+
+        return new SurveyQuestionDetailDto(
+            question.Id,
+            question.Text,
+            question.Description,
+            question.Type,
+            question.Order,
+            question.IsRequired,
+            options,
+            MapAttachment(question.Attachment),
+            question.GetAllowedAttachmentContentTypes());
     }
 
     private static AttachmentDto? MapAttachment(Domain.Surveys.Attachment? attachment)

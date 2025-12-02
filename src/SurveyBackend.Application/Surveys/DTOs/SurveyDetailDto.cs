@@ -26,4 +26,10 @@ public sealed record SurveyQuestionDetailDto(
     AttachmentDto? Attachment = null,
     IReadOnlyCollection<string>? AllowedAttachmentContentTypes = null);
 
-public sealed record SurveyOptionDetailDto(Guid Id, string Text, int Order, int? Value, AttachmentDto? Attachment = null);
+public sealed record SurveyOptionDetailDto(
+    Guid Id,
+    string Text,
+    int Order,
+    int? Value,
+    AttachmentDto? Attachment = null,
+    IReadOnlyCollection<SurveyQuestionDetailDto>? ChildQuestions = null);

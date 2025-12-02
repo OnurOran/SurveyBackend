@@ -66,6 +66,25 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                     throw new InvalidOperationException("Dosya tipi kısıtı sadece dosya yükleme soruları için geçerlidir.");
                 }
 
+                // Validate Conditional questions
+                if (questionDto.Type == Domain.Enums.QuestionType.Conditional)
+                {
+                    if (questionDto.Options is null || questionDto.Options.Count != 3)
+                    {
+                        throw new InvalidOperationException("Koşullu sorular tam olarak 3 seçenek içermelidir.");
+                    }
+                    if (questionDto.ChildQuestions is not null)
+                    {
+                        foreach (var childDto in questionDto.ChildQuestions)
+                        {
+                            if (childDto.Type == Domain.Enums.QuestionType.Conditional)
+                            {
+                                throw new InvalidOperationException("Alt sorular Koşullu tip olamaz.");
+                            }
+                        }
+                    }
+                }
+
                 var question = survey.AddQuestion(Guid.NewGuid(), questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
                 if (questionDto.Type == Domain.Enums.QuestionType.FileUpload)
                 {
@@ -87,6 +106,48 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                     if (optionDto.Attachment is not null)
                     {
                         optionAttachmentQueue.Add((option, optionDto.Attachment));
+                    }
+                }
+
+                // Handle child questions for Conditional questions
+                if (questionDto.Type == Domain.Enums.QuestionType.Conditional && questionDto.ChildQuestions is not null)
+                {
+                    foreach (var childDto in questionDto.ChildQuestions)
+                    {
+                        // Find parent option by order
+                        var parentOption = question.Options.FirstOrDefault(o => o.Order == childDto.ParentOptionOrder);
+                        if (parentOption is null)
+                        {
+                            throw new InvalidOperationException($"Seçenek sırası {childDto.ParentOptionOrder} bulunamadı.");
+                        }
+
+                        // Create child question
+                        var childQuestion = survey.AddQuestion(Guid.NewGuid(), childDto.Text, childDto.Type, childDto.Order, childDto.IsRequired);
+                        if (childDto.Type == Domain.Enums.QuestionType.FileUpload)
+                        {
+                            var normalizedAllowed = NormalizeAllowedContentTypes(childDto.AllowedAttachmentContentTypes);
+                            childQuestion.SetAllowedAttachmentContentTypes(normalizedAllowed);
+                        }
+                        if (childDto.Attachment is not null)
+                        {
+                            questionAttachmentQueue.Add((childQuestion, childDto.Attachment));
+                        }
+
+                        // Add child question options if any
+                        if (childDto.Options is not null)
+                        {
+                            foreach (var childOptionDto in childDto.Options)
+                            {
+                                var childOption = childQuestion.AddOption(Guid.NewGuid(), childOptionDto.Text, childOptionDto.Order, childOptionDto.Value);
+                                if (childOptionDto.Attachment is not null)
+                                {
+                                    optionAttachmentQueue.Add((childOption, childOptionDto.Attachment));
+                                }
+                            }
+                        }
+
+                        // Create dependent question mapping
+                        parentOption.AddDependentQuestion(Guid.NewGuid(), childQuestion.Id);
                     }
                 }
             }
