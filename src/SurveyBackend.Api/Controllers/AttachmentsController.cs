@@ -24,17 +24,39 @@ public class AttachmentsController : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Download(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.SendAsync<GetAttachmentQuery, AttachmentDownloadResult>(new GetAttachmentQuery(id), cancellationToken);
-        var stream = await _fileStorage.OpenReadAsync(result.StoragePath, cancellationToken);
-        return File(stream, result.ContentType, result.FileName);
+        try
+        {
+            var result = await _mediator.SendAsync<GetAttachmentQuery, AttachmentDownloadResult>(new GetAttachmentQuery(id), cancellationToken);
+            var stream = await _fileStorage.OpenReadAsync(result.StoragePath, cancellationToken);
+            return File(stream, result.ContentType, result.FileName);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (FileNotFoundException)
+        {
+            return NotFound();
+        }
     }
 
     [AllowAnonymous]
     [HttpGet("answers/{id:guid}")]
     public async Task<IActionResult> DownloadAnswerAttachment(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _mediator.SendAsync<GetAnswerAttachmentQuery, AttachmentDownloadResult>(new GetAnswerAttachmentQuery(id), cancellationToken);
-        var stream = await _fileStorage.OpenReadAsync(result.StoragePath, cancellationToken);
-        return File(stream, result.ContentType, result.FileName);
+        try
+        {
+            var result = await _mediator.SendAsync<GetAnswerAttachmentQuery, AttachmentDownloadResult>(new GetAnswerAttachmentQuery(id), cancellationToken);
+            var stream = await _fileStorage.OpenReadAsync(result.StoragePath, cancellationToken);
+            return File(stream, result.ContentType, result.FileName);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (FileNotFoundException)
+        {
+            return NotFound();
+        }
     }
 }

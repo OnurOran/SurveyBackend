@@ -59,12 +59,8 @@ public sealed class GetAttachmentQueryHandler : ICommandHandler<GetAttachmentQue
 
         if (info.AccessType == AccessType.Internal)
         {
-            if (_currentUserService.IsAuthenticated && _currentUserService.DepartmentId == info.DepartmentId)
-            {
-                return;
-            }
-
-            throw new UnauthorizedAccessException("Dosyaya erişim için yetkili değilsiniz.");
+            // Allow viewing attachments for active internal surveys without requiring auth headers
+            return;
         }
 
         throw new UnauthorizedAccessException("Dosyaya erişim için yetkili değilsiniz.");

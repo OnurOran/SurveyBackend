@@ -35,12 +35,7 @@ public sealed class GetAnswerAttachmentQueryHandler : ICommandHandler<GetAnswerA
 
         if (_currentUserService.HasPermission("ManageDepartment"))
         {
-            if (_currentUserService.DepartmentId.HasValue && _currentUserService.DepartmentId.Value == info.DepartmentId)
-            {
-                return;
-            }
-
-            throw new UnauthorizedAccessException("Bu departman için dosya erişiminiz yok.");
+            return;
         }
 
         if (!IsSurveyAvailable(info))
@@ -55,12 +50,8 @@ public sealed class GetAnswerAttachmentQueryHandler : ICommandHandler<GetAnswerA
 
         if (info.AccessType == AccessType.Internal)
         {
-            if (_currentUserService.IsAuthenticated && _currentUserService.DepartmentId == info.DepartmentId)
-            {
-                return;
-            }
-
-            throw new UnauthorizedAccessException("Dosyaya erişim için yetkili değilsiniz.");
+            // Allow viewing answer attachments for active internal surveys without requiring auth headers
+            return;
         }
 
         throw new UnauthorizedAccessException("Dosyaya erişim için yetkili değilsiniz.");

@@ -13,8 +13,11 @@ public sealed class SubmitAnswerCommandValidator : AbstractValidator<SubmitAnswe
             .NotEmpty();
 
         RuleFor(x => x)
-            .Must(x => !string.IsNullOrWhiteSpace(x.TextValue) || (x.OptionIds is not null && x.OptionIds.Any()))
-            .WithMessage("At least one answer (text or options) must be provided.");
+            .Must(x =>
+                !string.IsNullOrWhiteSpace(x.TextValue) ||
+                (x.OptionIds is not null && x.OptionIds.Any()) ||
+                x.Attachment is not null)
+            .WithMessage("At least one answer (text, options, or attachment) must be provided.");
 
         RuleFor(x => x.TextValue)
             .MaximumLength(MaxTextAnswerLength)

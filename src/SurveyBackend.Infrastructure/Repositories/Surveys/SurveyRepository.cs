@@ -73,13 +73,15 @@ public sealed class SurveyRepository : ISurveyRepository
                 s.DepartmentId,
                 s.IsActive,
                 s.CreatedAt,
+                s.StartDate,
+                s.EndDate,
                 ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
             })
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return data
-            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.ParticipationCount))
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.StartDate, s.EndDate, s.ParticipationCount))
             .ToList();
     }
 
@@ -95,13 +97,15 @@ public sealed class SurveyRepository : ISurveyRepository
                 s.DepartmentId,
                 s.IsActive,
                 s.CreatedAt,
+                s.StartDate,
+                s.EndDate,
                 ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
             })
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return data
-            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.ParticipationCount))
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.StartDate, s.EndDate, s.ParticipationCount))
             .ToList();
     }
 

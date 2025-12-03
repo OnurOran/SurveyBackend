@@ -33,6 +33,12 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             throw new InvalidOperationException("Anket şu anda aktif değil.");
         }
 
+        // Check if internal survey requires authentication
+        if (survey.AccessType == Domain.Enums.AccessType.Internal && !_currentUserService.IsAuthenticated)
+        {
+            throw new UnauthorizedAccessException("Bu anket yalnızca dahili kullanıcılar için erişilebilir. Lütfen giriş yapın.");
+        }
+
         var now = DateTimeOffset.UtcNow;
         var isNewParticipant = false;
         Participant participant = null!;

@@ -15,13 +15,27 @@ public sealed class GetDepartmentDashboardQueryHandler : ICommandHandler<GetDepa
     public async Task<DepartmentDashboardDto> HandleAsync(GetDepartmentDashboardQuery request, CancellationToken cancellationToken)
     {
         var surveyStats = await _surveyRepository.GetSurveyStatsByDepartmentAsync(request.DepartmentId, cancellationToken);
+        var now = DateTimeOffset.UtcNow;
 
         var totalSurveys = surveyStats.Count;
-        var activeSurveys = surveyStats.Count(s => s.IsActive);
+        var activeSurveys = surveyStats.Count(s =>
+            s.IsActive &&
+            s.StartDate.HasValue &&
+            s.EndDate.HasValue &&
+            s.StartDate.Value <= now &&
+            s.EndDate.Value >= now);
         var totalParticipations = surveyStats.Sum(s => s.ParticipationCount);
 
         var items = surveyStats
-            .Select(s => new SurveyDashboardItemDto(s.SurveyId, s.Title, s.IsActive, s.CreatedAt, s.ParticipationCount))
+            .Select(s =>
+            {
+                var isCurrentlyActive = s.IsActive &&
+                    s.StartDate.HasValue &&
+                    s.EndDate.HasValue &&
+                    s.StartDate.Value <= now &&
+                    s.EndDate.Value >= now;
+                return new SurveyDashboardItemDto(s.SurveyId, s.Title, isCurrentlyActive, s.CreatedAt, s.ParticipationCount);
+            })
             .ToList();
 
         return new DepartmentDashboardDto(
