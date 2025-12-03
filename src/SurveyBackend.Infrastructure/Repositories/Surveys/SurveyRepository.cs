@@ -140,4 +140,10 @@ public sealed class SurveyRepository : ISurveyRepository
         _dbContext.Surveys.Update(survey);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task DeleteAsync(Survey survey, CancellationToken cancellationToken)
+    {
+        _dbContext.Surveys.Remove(survey);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

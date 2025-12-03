@@ -12,4 +12,5 @@ public interface ISurveyRepository
     Task<IReadOnlyList<SurveyStats>> GetSurveyStatsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken);
     Task UpdateAsync(Survey survey, CancellationToken cancellationToken);
+    Task DeleteAsync(Survey survey, CancellationToken cancellationToken);
 }

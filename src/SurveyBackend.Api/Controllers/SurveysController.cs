@@ -5,11 +5,13 @@ using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Interfaces.Identity;
 using SurveyBackend.Application.Surveys.Commands.AddQuestion;
 using SurveyBackend.Application.Surveys.Commands.Create;
+using SurveyBackend.Application.Surveys.Commands.Update;
 using SurveyBackend.Application.Surveys.Commands.Publish;
 using SurveyBackend.Application.Surveys.DTOs;
 using SurveyBackend.Application.Surveys.Queries.GetSurvey;
 using SurveyBackend.Application.Surveys.Queries.GetDepartmentSurveys;
 using SurveyBackend.Application.Surveys.Queries.GetSurveys;
+using SurveyBackend.Api.Contracts;
 
 namespace SurveyBackend.Api.Controllers;
 
@@ -64,6 +66,25 @@ public class SurveysController : ControllerBase
     {
         var surveyId = await _mediator.SendAsync<CreateSurveyCommand, Guid>(command, cancellationToken);
         return CreatedAtAction(nameof(GetSurvey), new { id = surveyId }, null);
+    }
+
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSurveyRequest request, CancellationToken cancellationToken)
+    {
+        var command = new UpdateSurveyCommand(
+            id,
+            request.Title,
+            request.Description,
+            request.IntroText,
+            request.ConsentText,
+            request.OutroText,
+            request.AccessType,
+            request.Questions,
+            request.Attachment);
+
+        await _mediator.SendAsync<UpdateSurveyCommand, bool>(command, cancellationToken);
+        return NoContent();
     }
 
     [AllowAnonymous]

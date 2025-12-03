@@ -65,6 +65,15 @@ public sealed class AttachmentService : IAttachmentService
             cancellationToken);
     }
 
+    public async Task RemoveAttachmentsAsync(IEnumerable<Attachment> attachments, CancellationToken cancellationToken)
+    {
+        foreach (var attachment in attachments)
+        {
+            await TryDeleteFileAsync(attachment.StoragePath, cancellationToken);
+            await _attachmentRepository.RemoveAsync(attachment, cancellationToken);
+        }
+    }
+
     private async Task<Attachment> SaveAsync(
         AttachmentOwnerType ownerType,
         Guid departmentId,
