@@ -38,11 +38,6 @@ public sealed class GetAnswerAttachmentQueryHandler : ICommandHandler<GetAnswerA
             return;
         }
 
-        if (!IsSurveyAvailable(info))
-        {
-            throw new UnauthorizedAccessException("Anket erişilebilir durumda değil.");
-        }
-
         if (info.AccessType == AccessType.Public)
         {
             return;

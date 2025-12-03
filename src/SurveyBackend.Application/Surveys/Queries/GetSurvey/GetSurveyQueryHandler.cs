@@ -1,3 +1,4 @@
+using SurveyBackend.Application.Interfaces.Identity;
 using SurveyBackend.Application.Interfaces.Persistence;
 using SurveyBackend.Application.Surveys.DTOs;
 using SurveyBackend.Domain.Surveys;
@@ -7,10 +8,12 @@ namespace SurveyBackend.Application.Surveys.Queries.GetSurvey;
 public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, SurveyDetailDto?>
 {
     private readonly ISurveyRepository _surveyRepository;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetSurveyQueryHandler(ISurveyRepository surveyRepository)
+    public GetSurveyQueryHandler(ISurveyRepository surveyRepository, ICurrentUserService currentUserService)
     {
         _surveyRepository = surveyRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task<SurveyDetailDto?> HandleAsync(GetSurveyQuery request, CancellationToken cancellationToken)
@@ -21,7 +24,8 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
             return null;
         }
 
-        if (!IsAvailable(survey))
+        // Allow unpublished/inactive surveys for admins/managers; public availability for everyone else
+        if (!IsAvailable(survey) && !HasManagementAccess(survey))
         {
             return null;
         }
@@ -149,5 +153,22 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
         }
 
         return new AttachmentDto(attachment.Id, attachment.FileName, attachment.ContentType, attachment.SizeBytes);
+    }
+
+    private bool HasManagementAccess(Survey survey)
+    {
+        if (_currentUserService.IsSuperAdmin || _currentUserService.HasPermission("ManageUsers"))
+        {
+            return true;
+        }
+
+        if (_currentUserService.HasPermission("ManageDepartment") &&
+            _currentUserService.DepartmentId.HasValue &&
+            _currentUserService.DepartmentId.Value == survey.DepartmentId)
+        {
+            return true;
+        }
+
+        return false;
     }
 }

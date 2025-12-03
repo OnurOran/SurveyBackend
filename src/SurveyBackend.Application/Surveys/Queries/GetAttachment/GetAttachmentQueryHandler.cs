@@ -47,11 +47,6 @@ public sealed class GetAttachmentQueryHandler : ICommandHandler<GetAttachmentQue
             throw new UnauthorizedAccessException("Bu departmandaki dosyaya erişim yetkiniz yok.");
         }
 
-        if (!IsSurveyAvailable(info))
-        {
-            throw new UnauthorizedAccessException("Anket erişilebilir durumda değil.");
-        }
-
         if (info.AccessType == AccessType.Public)
         {
             return;
