@@ -41,7 +41,10 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
             throw new UnauthorizedAccessException("Kullanıcı doğrulanamadı.");
         }
 
-        var creator = _currentUserService.UserId.Value.ToString();
+        // Prefer username for display; fall back to user id if missing
+        var creator = !string.IsNullOrWhiteSpace(_currentUserService.Username)
+            ? _currentUserService.Username!
+            : _currentUserService.UserId.Value.ToString();
         var now = DateTimeOffset.UtcNow;
         var departmentId = _currentUserService.DepartmentId
             ?? throw new UnauthorizedAccessException("Kullanıcının departman bilgisi bulunamadı.");
