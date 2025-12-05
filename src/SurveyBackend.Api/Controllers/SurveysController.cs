@@ -11,6 +11,7 @@ using SurveyBackend.Application.Surveys.DTOs;
 using SurveyBackend.Application.Surveys.Queries.GetSurvey;
 using SurveyBackend.Application.Surveys.Queries.GetDepartmentSurveys;
 using SurveyBackend.Application.Surveys.Queries.GetSurveys;
+using SurveyBackend.Application.Surveys.Queries.GetSurveyReport;
 using SurveyBackend.Api.Contracts;
 
 namespace SurveyBackend.Api.Controllers;
@@ -126,5 +127,38 @@ public class SurveysController : ControllerBase
         var command = new PublishSurveyCommand(id, request.StartDate, request.EndDate);
         await _mediator.SendAsync<PublishSurveyCommand, bool>(command, cancellationToken);
         return NoContent();
+    }
+
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
+    [HttpGet("{id:guid}/report")]
+    public async Task<ActionResult<SurveyReportDto>> GetReport(Guid id, CancellationToken cancellationToken)
+    {
+        var query = new GetSurveyReportQuery(id);
+        var response = await _mediator.SendAsync<GetSurveyReportQuery, SurveyReportDto?>(query, cancellationToken);
+        if (response is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(response);
+    }
+
+    [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
+    [HttpGet("{id:guid}/report/participant")]
+    public async Task<ActionResult<ParticipantResponseDto>> GetParticipantResponse(Guid id, [FromQuery] string participantName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(participantName))
+        {
+            return BadRequest("Participant name is required");
+        }
+
+        var query = new GetParticipantResponseQuery(id, participantName);
+        var response = await _mediator.SendAsync<GetParticipantResponseQuery, ParticipantResponseDto?>(query, cancellationToken);
+        if (response is null)
+        {
+            return NotFound("Participant not found or survey is not internal");
+        }
+
+        return Ok(response);
     }
 }

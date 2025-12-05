@@ -1,109 +1,98 @@
-# Survey System Database Schema & Domain Rules
+## Domain Model (current implementation)
 
-This document outlines the database schema, relationships, and enums for the Survey System.
-**Architecture:** Clean Architecture + Domain-Driven Design (DDD).
-**Technology Stack:** .NET Core 9, Entity Framework Core (Code-First).
+### Enums
+- `AccessType`: Internal, Public
+- `QuestionType`: SingleSelect, MultiSelect, OpenText, FileUpload, Conditional
+- `SurveyStatus`: Draft, Published (not used in EF)
+- `AttachmentOwnerType`: Survey, Question, Option
 
-## 1. Enums
+### Core Entities & Relationships
+- **Department**
+  - Id (PK), Name, ExternalIdentifier (unique)
+  - One-to-many Users; referenced by Surveys; UserRoles.
 
-### AccessType
-Defines who can access the survey.
-- `Internal` (0): Requires LDAP Authentication (Company Employees).
-- `Public` (1): Open to everyone (No Login required, tracked via Cookie/Session).
+- **User**
+  - Id (PK), Username, Email, DepartmentId (FK), PasswordHash?, IsSuperAdmin, CreatedAt, UpdatedAt
+  - One-to-many RefreshTokens; one-to-many UserRoles
+  - FK to Department (Restrict)
 
-### QuestionType
-Defines the UI and data storage logic for a question.
-- `SingleSelect` (0): Radio buttons (uses AnswerOption).
-- `MultiSelect` (1): Checkboxes (uses AnswerOption).
-- `OpenText` (2): TextArea (uses Answer.TextValue).
+- **RefreshToken**
+  - Id (PK), Token (unique), UserId (FK), ExpiresAt, CreatedAt
 
----
+- **Role**
+  - Id (PK), Name, Description
+  - One-to-many RolePermissions
 
-## 2. Domain Entities (Aggregates & Roots)
+- **Permission**
+  - Id (PK), Name, Description
 
-### Survey (Aggregate Root)
-Represents the survey definition.
-*Behaviors:* `Publish()`, `AddQuestion()`.
-- `Id` (Guid, PK)
-- `Title` (string, MaxLength: 200, Required)
-- `Description` (string, MaxLength: 2000, Nullable) - HTML/Markdown supported.
-- `CreatedBy` (string, MaxLength: 100, Required) - Username/ID of the creator.
-- `CreatedAt` (DateTimeOffset, Required) - UTC.
-- `IsActive` (bool, Required) - Default: false.
-- `AccessType` (Enum: AccessType, Required)
-- `StartDate` (DateTimeOffset, Nullable)
-- `EndDate` (DateTimeOffset, Nullable)
-- **Navigation:** `ICollection<Question> Questions`
+- **RolePermission**
+  - Composite PK (RoleId, PermissionId), FK to Role, FK to Permission
 
-### Question (Entity)
-Represents a question within a survey.
-*Behaviors:* `AddOption()`.
-- `Id` (Guid, PK)
-- `SurveyId` (Guid, FK -> Survey)
-- `Text` (string, MaxLength: 1000, Required)
-- `Description` (string, MaxLength: 500, Nullable)
-- `Order` (int, Required)
-- `Type` (Enum: QuestionType, Required)
-- `IsRequired` (bool, Required)
-- **Navigation:** `ICollection<QuestionOption> Options`
+- **UserRole**
+  - Composite PK (UserId, RoleId, DepartmentId)
+  - FK to Role; FK to Department (Restrict)
 
-### QuestionOption (Entity)
-Represents choices for SingleSelect/MultiSelect questions.
-- `Id` (Guid, PK)
-- `QuestionId` (Guid, FK -> Question)
-- `Text` (string, MaxLength: 500, Required)
-- `Order` (int, Required)
-- `Value` (int, Nullable) - Optional score value for the option (e.g. Correct answer = 10 points).
-- **Navigation:** `ICollection<DependentQuestion> DependentQuestions`
+- **Survey**
+  - Id (PK), Title, Description?, IntroText?, ConsentText?, OutroText?, CreatedBy (string), DepartmentId (FK), CreatedAt, IsActive (default false), AccessType, StartDate?, EndDate?
+  - One-to-many Questions (Cascade)
+  - One-to-one Attachment (Cascade)
+  - FK to Department (Restrict)
 
-### DependentQuestion (Entity)
-Handles branching logic. "If ParentOption is selected, show ChildQuestion".
-- `Id` (Guid, PK)
-- `ParentQuestionOptionId` (Guid, FK -> QuestionOption) - The trigger.
-- `ChildQuestionId` (Guid, FK -> Question) - The action (question to show).
-*Note:* The order of child questions is determined by `Question.Order`.
+- **Question**
+  - Id (PK), SurveyId (FK), Text, Description?, Order, Type (QuestionType), IsRequired, AllowedAttachmentContentTypes?
+  - One-to-many QuestionOptions (Cascade)
+  - One-to-one Attachment (Restrict)
+  - One-to-many Answers (Cascade via Answer.Question FK)
 
-### Participant (Entity)
-Represents the user taking the survey.
-- `Id` (Guid, PK)
-- `ExternalId` (Guid, Nullable) - Unique Cookie ID for Public users.
-- `LdapUsername` (string, MaxLength: 100, Nullable) - For Internal users.
-- `CreatedAt` (DateTimeOffset, Required)
+- **QuestionOption**
+  - Id (PK), QuestionId (FK), Text, Order, Value?
+  - One-to-many DependentQuestions (ParentOption FK, Restrict)
+  - One-to-one Attachment (Cascade)
 
-### Participation (Aggregate Root)
-Represents a single session of a user taking a survey.
-*Behaviors:* `Start()`, `Complete()`, `AddAnswer()`.
-- `Id` (Guid, PK)
-- `SurveyId` (Guid, FK -> Survey)
-- `ParticipantId` (Guid, FK -> Participant)
-- `StartedAt` (DateTimeOffset, Required)
-- `CompletedAt` (DateTimeOffset, Nullable) - If null, survey is incomplete.
-- `IpAddress` (string, MaxLength: 50, Nullable)
-- **Navigation:** `ICollection<Answer> Answers`
+- **DependentQuestion**
+  - Id (PK), ParentQuestionOptionId (FK to QuestionOption, Restrict), ChildQuestionId (FK to Question, Restrict)
+  - Enables conditional branching; order of children is via Question.Order
 
-### Answer (Entity)
-Represents the user's response to a specific question.
-- `Id` (Guid, PK)
-- `ParticipationId` (Guid, FK -> Participation)
-- `QuestionId` (Guid, FK -> Question)
-- `TextValue` (string, Nullable) - Only used for `OpenText` questions.
-- **Navigation:** `ICollection<AnswerOption> SelectedOptions`
+- **Attachment** (for survey/question/option definitions)
+  - Id (PK), OwnerType (AttachmentOwnerType), DepartmentId, SurveyId?, QuestionId?, QuestionOptionId?, FileName, ContentType, SizeBytes, StoragePath, CreatedAt
+  - Unique indexes on SurveyId, QuestionId, QuestionOptionId (each nullable)
+  - Check constraint ensures exactly one owner FK is set
+  - One-to-one with Survey (Cascade), Question (Restrict), QuestionOption (Restrict)
 
-### AnswerOption (Entity)
-Junction table for selected choices in SingleSelect/MultiSelect questions.
-- `Id` (Guid, PK)
-- `AnswerId` (Guid, FK -> Answer)
-- `QuestionOptionId` (Guid, FK -> QuestionOption)
+- **Participant**
+  - Id (PK), ExternalId?, LdapUsername?, CreatedAt
+  - Unique indexes on ExternalId (when not null) and LdapUsername (when not null)
 
----
+- **Participation**
+  - Id (PK), SurveyId (FK), ParticipantId (FK), StartedAt, CompletedAt?, IpAddress?
+  - One-to-many Answers (Cascade)
+  - FK to Participant (Cascade); FK to Survey (Restrict)
 
-## 3. Persistence Rules (EF Core Configurations)
+- **Answer**
+  - Id (PK), ParticipationId (FK), QuestionId (FK), TextValue?
+  - One-to-many AnswerOptions (Cascade)
+  - One-to-one AnswerAttachment (Cascade)
+  - FK to Question (Cascade)
 
-1.  **Delete Behavior:**
-    - Deleting a `Survey` -> Cascades to `Questions`.
-    - Deleting a `Question` -> Cascades to `Options` and `Answers`.
-    - Deleting a `Participation` -> Cascades to `Answers`.
-2.  **Logic Constraint:**
-    - `DependentQuestion` relationships should use `Restrict` on delete for the Parent to avoid cycles.
-3.  **Querying:**
-    - Always use `AsSplitQuery()` when fetching deep hierarchies (Survey -> Questions -> Options -> Dependent -> Child).
+- **AnswerOption**
+  - Id (PK), AnswerId (FK), QuestionOptionId (FK Restrict)
+
+- **AnswerAttachment** (uploads from respondents)
+  - Id (PK), AnswerId (FK), SurveyId, DepartmentId, FileName, ContentType, SizeBytes, StoragePath, CreatedAt
+  - Unique index on AnswerId
+  - One-to-one with Answer (Cascade)
+
+### Cascades / Delete behaviors (from EF configuration)
+- Survey → Questions (Cascade)
+- Question → Options, Answers (Cascade)
+- QuestionOption → DependentQuestions (Restrict), Attachment (Cascade)
+- Participation → Answers (Cascade)
+- Answer → AnswerOptions (Cascade), AnswerAttachment (Cascade)
+- Attachment: Survey (Cascade), Question (Restrict), QuestionOption (Restrict)
+- UserRole Department FK (Restrict); Department FK on Survey/User/UserRole (Restrict)
+
+### Key rules
+- File upload questions can specify allowed content types (stored as comma string); non-file questions should not set allowed types.
+- Attachments limited to allowed MIME set (png, jpg/jpeg, webp, pdf) and max 5MB (enforced in services).
+- Conditional branching uses DependentQuestion linking parent option to child question.

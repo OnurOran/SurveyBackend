@@ -31,6 +31,38 @@ public sealed class ParticipationRepository : IParticipationRepository
             .FirstOrDefaultAsync(p => p.SurveyId == surveyId && p.ParticipantId == participantId, cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Participation>> GetBySurveyIdAsync(Guid surveyId, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Participations
+            .Include(p => p.Participant)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.SelectedOptions)
+                    .ThenInclude(so => so.QuestionOption)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.Attachment)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.Question)
+            .Where(p => p.SurveyId == surveyId)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Participation?> GetByParticipantNameAsync(Guid surveyId, string participantName, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Participations
+            .Include(p => p.Participant)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.SelectedOptions)
+                    .ThenInclude(so => so.QuestionOption)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.Question)
+            .Where(p => p.SurveyId == surveyId &&
+                       p.Participant.LdapUsername != null &&
+                       p.Participant.LdapUsername.ToLower().Contains(participantName.ToLower()))
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task AddAsync(Participation participation, CancellationToken cancellationToken)
     {
         await _dbContext.Participations.AddAsync(participation, cancellationToken);
