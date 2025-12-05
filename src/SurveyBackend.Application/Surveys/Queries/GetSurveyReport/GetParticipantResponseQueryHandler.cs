@@ -61,7 +61,7 @@ public sealed class GetParticipantResponseQueryHandler : ICommandHandler<GetPart
                     .Select(so => so.QuestionOption.Text)
                     .ToList(),
                 FileName = a.Attachment?.FileName,
-                AnswerId = a.Attachment != null ? a.Id : null
+                AnswerId = a.Attachment != null ? a.Attachment.Id : null
             })
             .ToList();
 

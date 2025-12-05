@@ -33,6 +33,7 @@ public sealed record QuestionReportDto
     public bool IsRequired { get; init; }
     public int TotalResponses { get; init; }
     public double ResponseRate { get; init; }
+    public AttachmentDto? Attachment { get; init; }
 
     // For SingleSelect and MultiSelect
     public IReadOnlyList<OptionResultDto>? OptionResults { get; init; }
@@ -67,6 +68,7 @@ public sealed record TextResponseDto
 public sealed record FileResponseDto
 {
     public Guid AnswerId { get; init; }
+    public Guid AttachmentId { get; init; }
     public Guid ParticipationId { get; init; }
     public string? ParticipantName { get; init; } // Only for internal surveys
     public string FileName { get; init; } = string.Empty;

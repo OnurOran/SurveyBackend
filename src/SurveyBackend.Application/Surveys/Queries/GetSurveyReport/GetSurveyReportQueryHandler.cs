@@ -111,7 +111,13 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                 Order = question.Order,
                 IsRequired = question.IsRequired,
                 TotalResponses = totalResponses,
-                ResponseRate = Math.Round(responseRate, 2)
+                ResponseRate = Math.Round(responseRate, 2),
+                Attachment = question.Attachment != null ? new AttachmentDto(
+                    question.Attachment.Id,
+                    question.Attachment.FileName,
+                    question.Attachment.ContentType,
+                    question.Attachment.SizeBytes
+                ) : null
             }
         };
 
@@ -147,6 +153,12 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IsRequired = question.IsRequired,
             TotalResponses = totalResponses,
             ResponseRate = Math.Round(responseRate, 2),
+            Attachment = question.Attachment != null ? new AttachmentDto(
+                question.Attachment.Id,
+                question.Attachment.FileName,
+                question.Attachment.ContentType,
+                question.Attachment.SizeBytes
+            ) : null,
             OptionResults = optionResults
         };
     }
@@ -182,6 +194,12 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IsRequired = question.IsRequired,
             TotalResponses = totalResponses,
             ResponseRate = Math.Round(responseRate, 2),
+            Attachment = question.Attachment != null ? new AttachmentDto(
+                question.Attachment.Id,
+                question.Attachment.FileName,
+                question.Attachment.ContentType,
+                question.Attachment.SizeBytes
+            ) : null,
             OptionResults = optionResults
         };
     }
@@ -217,6 +235,12 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IsRequired = question.IsRequired,
             TotalResponses = totalResponses,
             ResponseRate = Math.Round(responseRate, 2),
+            Attachment = question.Attachment != null ? new AttachmentDto(
+                question.Attachment.Id,
+                question.Attachment.FileName,
+                question.Attachment.ContentType,
+                question.Attachment.SizeBytes
+            ) : null,
             TextResponses = textResponses
         };
     }
@@ -235,9 +259,10 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                 return new FileResponseDto
                 {
                     AnswerId = a.Id,
+                    AttachmentId = a.Attachment!.Id,
                     ParticipationId = a.ParticipationId,
                     ParticipantName = participantName,
-                    FileName = a.Attachment!.FileName,
+                    FileName = a.Attachment.FileName,
                     ContentType = a.Attachment.ContentType,
                     SizeBytes = a.Attachment.SizeBytes,
                     SubmittedAt = participation?.CompletedAt?.UtcDateTime ?? participation?.StartedAt.UtcDateTime ?? DateTime.UtcNow
@@ -255,6 +280,12 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IsRequired = question.IsRequired,
             TotalResponses = totalResponses,
             ResponseRate = Math.Round(responseRate, 2),
+            Attachment = question.Attachment != null ? new AttachmentDto(
+                question.Attachment.Id,
+                question.Attachment.FileName,
+                question.Attachment.ContentType,
+                question.Attachment.SizeBytes
+            ) : null,
             FileResponses = fileResponses
         };
     }
@@ -322,6 +353,12 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IsRequired = question.IsRequired,
             TotalResponses = totalResponses,
             ResponseRate = Math.Round(responseRate, 2),
+            Attachment = question.Attachment != null ? new AttachmentDto(
+                question.Attachment.Id,
+                question.Attachment.FileName,
+                question.Attachment.ContentType,
+                question.Attachment.SizeBytes
+            ) : null,
             OptionResults = optionResults,
             ConditionalResults = conditionalResults
         };
