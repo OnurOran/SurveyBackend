@@ -55,6 +55,8 @@ public sealed class ParticipationRepository : IParticipationRepository
                 .ThenInclude(a => a.SelectedOptions)
                     .ThenInclude(so => so.QuestionOption)
             .Include(p => p.Answers)
+                .ThenInclude(a => a.Attachment)
+            .Include(p => p.Answers)
                 .ThenInclude(a => a.Question)
             .Where(p => p.SurveyId == surveyId &&
                        p.Participant.LdapUsername != null &&
