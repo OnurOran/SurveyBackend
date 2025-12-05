@@ -73,6 +73,8 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             SurveyId = survey.Id,
             Title = survey.Title,
             Description = survey.Description,
+            IntroText = survey.IntroText,
+            OutroText = survey.OutroText,
             AccessType = survey.AccessType.ToString(),
             StartDate = survey.StartDate?.UtcDateTime,
             EndDate = survey.EndDate?.UtcDateTime,
@@ -81,7 +83,13 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             CompletedParticipations = completedParticipations,
             CompletionRate = Math.Round(completionRate, 2),
             Participants = participantList,
-            Questions = questionReports
+            Questions = questionReports,
+            Attachment = survey.Attachment != null ? new AttachmentDto(
+                survey.Attachment.Id,
+                survey.Attachment.FileName,
+                survey.Attachment.ContentType,
+                survey.Attachment.SizeBytes
+            ) : null
         };
     }
 
@@ -139,7 +147,13 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                     Text = option.Text,
                     Order = option.Order,
                     SelectionCount = selectionCount,
-                    Percentage = Math.Round(percentage, 2)
+                    Percentage = Math.Round(percentage, 2),
+                    Attachment = option.Attachment != null ? new AttachmentDto(
+                        option.Attachment.Id,
+                        option.Attachment.FileName,
+                        option.Attachment.ContentType,
+                        option.Attachment.SizeBytes
+                    ) : null
                 };
             })
             .ToList();
@@ -180,7 +194,13 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                     Text = option.Text,
                     Order = option.Order,
                     SelectionCount = selectionCount,
-                    Percentage = Math.Round(percentage, 2)
+                    Percentage = Math.Round(percentage, 2),
+                    Attachment = option.Attachment != null ? new AttachmentDto(
+                        option.Attachment.Id,
+                        option.Attachment.FileName,
+                        option.Attachment.ContentType,
+                        option.Attachment.SizeBytes
+                    ) : null
                 };
             })
             .ToList();
@@ -339,7 +359,13 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                     Text = option.Text,
                     Order = option.Order,
                     SelectionCount = selectionCount,
-                    Percentage = Math.Round(percentage, 2)
+                    Percentage = Math.Round(percentage, 2),
+                    Attachment = option.Attachment != null ? new AttachmentDto(
+                        option.Attachment.Id,
+                        option.Attachment.FileName,
+                        option.Attachment.ContentType,
+                        option.Attachment.SizeBytes
+                    ) : null
                 };
             })
             .ToList();

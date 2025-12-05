@@ -5,6 +5,8 @@ public sealed record SurveyReportDto
     public Guid SurveyId { get; init; }
     public string Title { get; init; } = string.Empty;
     public string Description { get; init; } = string.Empty;
+    public string? IntroText { get; init; }
+    public string? OutroText { get; init; }
     public string AccessType { get; init; } = string.Empty;
     public DateTime? StartDate { get; init; }
     public DateTime? EndDate { get; init; }
@@ -14,6 +16,7 @@ public sealed record SurveyReportDto
     public double CompletionRate { get; init; }
     public IReadOnlyList<ParticipantSummaryDto> Participants { get; init; } = Array.Empty<ParticipantSummaryDto>();
     public IReadOnlyList<QuestionReportDto> Questions { get; init; } = Array.Empty<QuestionReportDto>();
+    public AttachmentDto? Attachment { get; init; }
 }
 
 public sealed record ParticipantSummaryDto
@@ -55,6 +58,7 @@ public sealed record OptionResultDto
     public int Order { get; init; }
     public int SelectionCount { get; init; }
     public double Percentage { get; init; }
+    public AttachmentDto? Attachment { get; init; }
 }
 
 public sealed record TextResponseDto
