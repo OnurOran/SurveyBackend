@@ -85,6 +85,13 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
         var existingParticipation = await _participationRepository.GetBySurveyAndParticipantAsync(survey.Id, participant.Id, cancellationToken);
         if (existingParticipation is not null)
         {
+            // Check if the participation is already completed
+            if (existingParticipation.CompletedAt.HasValue)
+            {
+                throw new InvalidOperationException("Bu anketi zaten tamamladınız. Tekrar katılamazsınız.");
+            }
+
+            // Allow resuming incomplete participation
             return existingParticipation.Id;
         }
 

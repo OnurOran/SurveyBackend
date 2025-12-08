@@ -22,13 +22,24 @@ public class AttachmentsController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Download(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Download(Guid id, [FromQuery] bool download = false, CancellationToken cancellationToken = default)
     {
         try
         {
             var result = await _mediator.SendAsync<GetAttachmentQuery, AttachmentDownloadResult>(new GetAttachmentQuery(id), cancellationToken);
             var stream = await _fileStorage.OpenReadAsync(result.StoragePath, cancellationToken);
-            return File(stream, result.ContentType, result.FileName);
+
+            // If download=true, force download. Otherwise, display inline (for PDFs)
+            if (download)
+            {
+                return File(stream, result.ContentType, result.FileName);
+            }
+            else
+            {
+                // Display inline without forcing download
+                Response.Headers.Append("Content-Disposition", $"inline; filename=\"{result.FileName}\"");
+                return File(stream, result.ContentType);
+            }
         }
         catch (UnauthorizedAccessException)
         {

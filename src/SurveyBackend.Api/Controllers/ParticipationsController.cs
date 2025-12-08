@@ -6,6 +6,7 @@ using SurveyBackend.Application.Participations.Commands.CompleteParticipation;
 using SurveyBackend.Application.Participations.Commands.StartParticipation;
 using SurveyBackend.Application.Participations.Commands.SubmitAnswer;
 using SurveyBackend.Application.Participations.DTOs;
+using SurveyBackend.Application.Participations.Queries.CheckParticipationStatus;
 
 namespace SurveyBackend.Api.Controllers;
 
@@ -19,6 +20,25 @@ public class ParticipationsController : ControllerBase
     public ParticipationsController(IAppMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("status/{surveyId:guid}")]
+    public async Task<ActionResult<ParticipationStatusResult>> CheckStatus(Guid surveyId, CancellationToken cancellationToken)
+    {
+        Guid? externalId = null;
+
+        if (!User.Identity?.IsAuthenticated ?? true)
+        {
+            if (Request.Cookies.TryGetValue(ParticipantCookieName, out var cookieValue) && Guid.TryParse(cookieValue, out var cookieId))
+            {
+                externalId = cookieId;
+            }
+        }
+
+        var query = new CheckParticipationStatusQuery(surveyId, externalId);
+        var result = await _mediator.SendAsync<CheckParticipationStatusQuery, ParticipationStatusResult>(query, cancellationToken);
+        return Ok(result);
     }
 
     [AllowAnonymous]
