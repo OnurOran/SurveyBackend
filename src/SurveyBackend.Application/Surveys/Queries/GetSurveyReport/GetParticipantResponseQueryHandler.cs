@@ -42,10 +42,10 @@ public sealed class GetParticipantResponseQueryHandler : ICommandHandler<GetPart
             return null;
         }
 
-        // Find participation by participant name
-        var participation = await _participationRepository.GetByParticipantNameAsync(request.SurveyId, request.ParticipantName, cancellationToken);
+        // Find participation by id
+        var participation = await _participationRepository.GetByIdAsync(request.ParticipationId, cancellationToken);
 
-        if (participation is null)
+        if (participation is null || participation.SurveyId != request.SurveyId)
         {
             return null;
         }
@@ -68,7 +68,7 @@ public sealed class GetParticipantResponseQueryHandler : ICommandHandler<GetPart
         return new ParticipantResponseDto
         {
             ParticipationId = participation.Id,
-            ParticipantName = participation.Participant.LdapUsername,
+            ParticipantName = participation.Participant?.LdapUsername,
             IsCompleted = participation.CompletedAt.HasValue,
             StartedAt = participation.StartedAt.UtcDateTime,
             CompletedAt = participation.CompletedAt?.UtcDateTime,

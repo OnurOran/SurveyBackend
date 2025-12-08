@@ -7,4 +7,4 @@ public sealed record GetSurveyReportQuery(Guid SurveyId) : ICommand<SurveyReport
 /// <summary>
 /// Optional query to get individual participant responses
 /// </summary>
-public sealed record GetParticipantResponseQuery(Guid SurveyId, string ParticipantName) : ICommand<ParticipantResponseDto?>;
+public sealed record GetParticipantResponseQuery(Guid SurveyId, Guid ParticipationId) : ICommand<ParticipantResponseDto?>;

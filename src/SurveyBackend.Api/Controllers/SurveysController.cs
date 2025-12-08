@@ -145,14 +145,14 @@ public class SurveysController : ControllerBase
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
     [HttpGet("{id:guid}/report/participant")]
-    public async Task<ActionResult<ParticipantResponseDto>> GetParticipantResponse(Guid id, [FromQuery] string participantName, CancellationToken cancellationToken)
+    public async Task<ActionResult<ParticipantResponseDto>> GetParticipantResponse(Guid id, [FromQuery] Guid participationId, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(participantName))
+        if (participationId == Guid.Empty)
         {
-            return BadRequest("Participant name is required");
+            return BadRequest("Participation id is required");
         }
 
-        var query = new GetParticipantResponseQuery(id, participantName);
+        var query = new GetParticipantResponseQuery(id, participationId);
         var response = await _mediator.SendAsync<GetParticipantResponseQuery, ParticipantResponseDto?>(query, cancellationToken);
         if (response is null)
         {

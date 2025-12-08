@@ -17,10 +17,14 @@ public sealed class ParticipationRepository : IParticipationRepository
     public async Task<Participation?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Participations
+            .Include(p => p.Participant)
             .Include(p => p.Answers)
                 .ThenInclude(a => a.SelectedOptions)
+                    .ThenInclude(so => so.QuestionOption)
             .Include(p => p.Answers)
                 .ThenInclude(a => a.Attachment)
+            .Include(p => p.Answers)
+                .ThenInclude(a => a.Question)
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
