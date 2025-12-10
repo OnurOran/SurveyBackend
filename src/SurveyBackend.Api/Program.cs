@@ -6,12 +6,16 @@ using Microsoft.OpenApi.Models;
 using SurveyBackend.Api.Middleware;
 using SurveyBackend.Api.Services;
 using SurveyBackend.Api.Authorization;
+using SurveyBackend.Api.Extensions;
+using SurveyBackend.Api.Health;
 using SurveyBackend.Application;
 using SurveyBackend.Application.Interfaces.Identity;
 using SurveyBackend.Infrastructure;
 using SurveyBackend.Infrastructure.BackgroundServices;
 using SurveyBackend.Infrastructure.Configurations;
+using SurveyBackend.Infrastructure.Persistence;
 using SurveyBackend.Infrastructure.Seeding;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +55,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000")
+            policy.SetIsOriginAllowed(_ => true) // TODO: tighten to specific origins in prod
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -62,6 +66,8 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("database");
 
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
                    ?? throw new InvalidOperationException("Jwt ayarları bulunamadı.");
@@ -85,6 +91,28 @@ builder.Services
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.TryGetValue(jwtSettings.AccessTokenCookieName, out var token) &&
+                    !string.IsNullOrWhiteSpace(token))
+                {
+                    context.Token = token;
+                    return Task.CompletedTask;
+                }
+
+                var authorizationHeader = context.Request.Headers.Authorization.FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(authorizationHeader) &&
+                    authorizationHeader.StartsWith("Bearer ", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Token = authorizationHeader["Bearer ".Length..].Trim();
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -95,6 +123,8 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler
 builder.Services.AddHostedService<TokenCleanupService>();
 
 var app = builder.Build();
+
+await app.ApplyDatabaseMigrationsAsync();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -118,6 +148,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

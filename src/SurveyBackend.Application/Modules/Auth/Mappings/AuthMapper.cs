@@ -12,7 +12,7 @@ public static class AuthMapper
         new(request.Username, request.Password);
 
     public static RefreshTokenCommand ToRefreshTokenCommand(RefreshTokenRequest request) =>
-        new(request.RefreshToken);
+        new(request.RefreshToken ?? string.Empty);
 
     public static AuthTokensDto ToAuthTokensDto(TokenResult result) =>
         new(result.AccessToken, result.RefreshToken, result.ExpiresIn);

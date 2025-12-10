@@ -8,6 +8,7 @@ public sealed class RefreshTokenRequestValidator : AbstractValidator<RefreshToke
     public RefreshTokenRequestValidator()
     {
         RuleFor(x => x.RefreshToken)
-            .NotEmpty();
+            .NotEmpty()
+            .When(x => x.RefreshToken is not null);
     }
 }

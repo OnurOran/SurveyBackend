@@ -48,7 +48,7 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             ? participations.Select(p => new ParticipantSummaryDto
             {
                 ParticipationId = p.Id,
-                ParticipantName = p.Participant.LdapUsername,
+                ParticipantName = p.Participant?.LdapUsername ?? "Unknown",
                 IsCompleted = p.CompletedAt.HasValue,
                 StartedAt = p.StartedAt.UtcDateTime
             }).ToList()
@@ -72,7 +72,7 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
         {
             SurveyId = survey.Id,
             Title = survey.Title,
-            Description = survey.Description,
+            Description = survey.Description ?? string.Empty,
             IntroText = survey.IntroText,
             OutroText = survey.OutroText,
             AccessType = survey.AccessType.ToString(),
