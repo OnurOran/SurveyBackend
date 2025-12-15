@@ -111,6 +111,19 @@ builder.Services
                 }
 
                 return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                // Allow [AllowAnonymous] endpoints to proceed even if token validation fails
+                var endpoint = context.HttpContext.GetEndpoint();
+                var allowAnonymous = endpoint?.Metadata?.GetMetadata<Microsoft.AspNetCore.Authorization.IAllowAnonymous>() != null;
+
+                if (allowAnonymous)
+                {
+                    context.NoResult();
+                }
+
+                return Task.CompletedTask;
             }
         };
     });
@@ -124,10 +137,11 @@ builder.Services.AddHostedService<TokenCleanupService>();
 
 var app = builder.Build();
 
-await app.ApplyDatabaseMigrationsAsync();
-
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
+    await app.ApplyDatabaseMigrationsAsync();
+
+    using var scope = app.Services.CreateScope();
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
 }

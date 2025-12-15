@@ -27,35 +27,40 @@ public sealed class GetAttachmentQueryHandler : ICommandHandler<GetAttachmentQue
 
     private void EnsureAccess(DTOs.AttachmentAccessInfo info)
     {
-        if (_currentUserService.IsSuperAdmin)
+        // Admins and managers can access everything
+        if (_currentUserService.IsSuperAdmin || _currentUserService.HasPermission("ManageUsers"))
         {
             return;
         }
 
-        if (_currentUserService.HasPermission("ManageUsers"))
+        // Department managers can access their department's surveys
+        if (_currentUserService.HasPermission("ManageDepartment") &&
+            _currentUserService.DepartmentId.HasValue &&
+            _currentUserService.DepartmentId.Value == info.DepartmentId)
         {
             return;
         }
 
-        if (_currentUserService.HasPermission("ManageDepartment"))
+        // Check if survey is available (active and within date range)
+        if (!IsSurveyAvailable(info))
         {
-            if (_currentUserService.DepartmentId.HasValue && _currentUserService.DepartmentId.Value == info.DepartmentId)
-            {
-                return;
-            }
-
-            throw new UnauthorizedAccessException("Bu departmandaki dosyaya erişim yetkiniz yok.");
+            throw new UnauthorizedAccessException("Anket şu anda erişilebilir değil.");
         }
 
+        // Public surveys are accessible to everyone
         if (info.AccessType == AccessType.Public)
         {
             return;
         }
 
+        // Internal surveys are accessible to authenticated users only
         if (info.AccessType == AccessType.Internal)
         {
-            // Allow viewing attachments for active internal surveys without requiring auth headers
-            return;
+            if (_currentUserService.IsAuthenticated)
+            {
+                return;
+            }
+            throw new UnauthorizedAccessException("Bu ankete erişim için giriş yapmanız gerekiyor.");
         }
 
         throw new UnauthorizedAccessException("Dosyaya erişim için yetkili değilsiniz.");

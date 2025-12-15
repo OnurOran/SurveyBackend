@@ -19,7 +19,13 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
             "image/jpeg",
             "image/jpg",
             "image/webp",
-            "application/pdf"
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+            "application/msword", // DOC
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
+            "application/vnd.ms-excel", // XLS
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation", // PPTX
+            "application/vnd.ms-powerpoint" // PPT
         };
 
     public CreateSurveyCommandHandler(
@@ -72,9 +78,9 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                 // Validate Conditional questions
                 if (questionDto.Type == Domain.Enums.QuestionType.Conditional)
                 {
-                    if (questionDto.Options is null || questionDto.Options.Count != 3)
+                    if (questionDto.Options is null || questionDto.Options.Count < 2 || questionDto.Options.Count > 5)
                     {
-                        throw new InvalidOperationException("Koşullu sorular tam olarak 3 seçenek içermelidir.");
+                        throw new InvalidOperationException("Koşullu sorular 2 ile 5 arasında seçenek içermelidir.");
                     }
                     if (questionDto.ChildQuestions is not null)
                     {
@@ -85,6 +91,15 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                                 throw new InvalidOperationException("Alt sorular Koşullu tip olamaz.");
                             }
                         }
+                    }
+                }
+
+                // Validate SingleSelect/MultiSelect questions
+                if (questionDto.Type == Domain.Enums.QuestionType.SingleSelect || questionDto.Type == Domain.Enums.QuestionType.MultiSelect)
+                {
+                    if (questionDto.Options is null || questionDto.Options.Count < 2 || questionDto.Options.Count > 10)
+                    {
+                        throw new InvalidOperationException("Tek seçim ve çoklu seçim soruları 2 ile 10 arasında seçenek içermelidir.");
                     }
                 }
 

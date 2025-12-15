@@ -15,7 +15,13 @@ public sealed class AnswerAttachmentService
             "image/jpeg",
             "image/jpg",
             "image/webp",
-            "application/pdf"
+            "application/pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+            "application/msword", // DOC
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // XLSX
+            "application/vnd.ms-excel", // XLS
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation", // PPTX
+            "application/vnd.ms-powerpoint" // PPT
         };
 
     private const long MaxAttachmentSizeBytes = 5 * 1024 * 1024;
