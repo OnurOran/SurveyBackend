@@ -4,6 +4,8 @@ namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record SurveyDetailDto(
     int Id,
+    int SurveyNumber,
+    string Slug,
     string Title,
     string? Description,
     string? IntroText,

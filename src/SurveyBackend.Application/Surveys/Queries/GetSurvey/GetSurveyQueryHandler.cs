@@ -46,6 +46,8 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
 
         return new SurveyDetailDto(
             survey.Id,
+            survey.Id,
+            survey.Slug,
             survey.Title,
             survey.Description,
             survey.IntroText,

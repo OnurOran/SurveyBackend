@@ -82,7 +82,13 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             }
         }
 
-        var existingParticipation = await _participationRepository.GetBySurveyAndParticipantAsync(survey.Id, participant.Id, cancellationToken);
+        if (isNewParticipant)
+        {
+            await _participantRepository.AddAsync(participant, cancellationToken);
+        }
+
+        var participantId = participant.Id;
+        var existingParticipation = await _participationRepository.GetBySurveyAndParticipantAsync(survey.Id, participantId, cancellationToken);
         if (existingParticipation is not null)
         {
             // Check if the participation is already completed
@@ -95,13 +101,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             return existingParticipation.Id;
         }
 
-        var participation = Participation.Start(survey.Id, participant.Id, now, request.IpAddress);
-
-        // Add participant if it's new (EF Core will handle this in a single transaction)
-        if (isNewParticipant)
-        {
-            await _participantRepository.AddAsync(participant, cancellationToken);
-        }
+        var participation = Participation.Start(survey.Id, participantId, now, request.IpAddress);
 
         await _participationRepository.AddAsync(participation, cancellationToken);
 

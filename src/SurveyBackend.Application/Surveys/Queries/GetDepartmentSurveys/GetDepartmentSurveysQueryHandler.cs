@@ -27,6 +27,8 @@ public sealed class GetDepartmentSurveysQueryHandler : ICommandHandler<GetDepart
 
             result.Add(new SurveyListItemDto(
                 survey.Id,
+                survey.Id,
+                survey.Slug,
                 survey.Title,
                 survey.Description,
                 survey.DepartmentId,
