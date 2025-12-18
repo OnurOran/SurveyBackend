@@ -4,7 +4,8 @@ public sealed class StartParticipationCommandValidator : AbstractValidator<Start
 {
     public StartParticipationCommandValidator()
     {
-        RuleFor(x => x.SurveyId)
-            .NotEmpty();
+        RuleFor(x => x.SurveyNumber)
+            .GreaterThan(0)
+            .WithMessage("SurveyNumber must be greater than 0");
     }
 }

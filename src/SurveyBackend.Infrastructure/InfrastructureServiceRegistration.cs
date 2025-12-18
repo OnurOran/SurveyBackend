@@ -27,8 +27,14 @@ public static class InfrastructureServiceRegistration
         var connectionString = configuration.GetConnectionString("DefaultConnection")
                                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' bulunamadı.");
 
-        services.AddDbContext<SurveyBackendDbContext>(options =>
-            options.UseSqlServer(connectionString));
+        // Register audit interceptor
+        services.AddScoped<AuditInterceptor>();
+
+        services.AddDbContext<SurveyBackendDbContext>((serviceProvider, options) =>
+        {
+            options.UseSqlServer(connectionString);
+            options.AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
+        });
 
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
         services.Configure<LdapSettings>(configuration.GetSection("Ldap"));

@@ -3,20 +3,20 @@ using SurveyBackend.Domain.Enums;
 namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record SurveyDetailDto(
-    Guid Id,
+    int Id,
     string Title,
     string? Description,
     string? IntroText,
     string? ConsentText,
     string? OutroText,
     AccessType AccessType,
-    DateTimeOffset? StartDate,
-    DateTimeOffset? EndDate,
+    DateTime? StartDate,
+    DateTime? EndDate,
     IReadOnlyCollection<SurveyQuestionDetailDto> Questions,
     AttachmentDto? Attachment = null);
 
 public sealed record SurveyQuestionDetailDto(
-    Guid Id,
+    int Id,
     string Text,
     string? Description,
     QuestionType Type,
@@ -27,7 +27,7 @@ public sealed record SurveyQuestionDetailDto(
     IReadOnlyCollection<string>? AllowedAttachmentContentTypes = null);
 
 public sealed record SurveyOptionDetailDto(
-    Guid Id,
+    int Id,
     string Text,
     int Order,
     int? Value,

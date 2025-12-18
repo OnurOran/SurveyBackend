@@ -6,7 +6,7 @@ public sealed class RemoveRoleFromUserCommandValidator : AbstractValidator<Remov
 {
     public RemoveRoleFromUserCommandValidator()
     {
-        RuleFor(x => x.UserId).NotEqual(Guid.Empty);
-        RuleFor(x => x.RoleId).NotEqual(Guid.Empty);
+        RuleFor(x => x.UserId).GreaterThan(0);
+        RuleFor(x => x.RoleId).GreaterThan(0);
     }
 }

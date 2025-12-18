@@ -5,15 +5,18 @@ namespace SurveyBackend.Application.Participations.Queries.CheckParticipationSta
 
 public sealed class CheckParticipationStatusQueryHandler : ICommandHandler<CheckParticipationStatusQuery, ParticipationStatusResult>
 {
+    private readonly ISurveyRepository _surveyRepository;
     private readonly IParticipantRepository _participantRepository;
     private readonly IParticipationRepository _participationRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public CheckParticipationStatusQueryHandler(
+        ISurveyRepository surveyRepository,
         IParticipantRepository participantRepository,
         IParticipationRepository participationRepository,
         ICurrentUserService currentUserService)
     {
+        _surveyRepository = surveyRepository;
         _participantRepository = participantRepository;
         _participationRepository = participationRepository;
         _currentUserService = currentUserService;
@@ -21,6 +24,13 @@ public sealed class CheckParticipationStatusQueryHandler : ICommandHandler<Check
 
     public async Task<ParticipationStatusResult> HandleAsync(CheckParticipationStatusQuery request, CancellationToken cancellationToken)
     {
+        // Get survey by survey number to get its ID
+        var survey = await _surveyRepository.GetBySurveyNumberAsync(request.SurveyNumber, cancellationToken);
+        if (survey is null)
+        {
+            throw new InvalidOperationException("Anket bulunamadı.");
+        }
+
         Domain.Surveys.Participant? participant = null;
 
         // Identify the participant (authenticated or anonymous)
@@ -51,7 +61,7 @@ public sealed class CheckParticipationStatusQueryHandler : ICommandHandler<Check
 
         // Check if participation exists for this survey and participant
         var participation = await _participationRepository.GetBySurveyAndParticipantAsync(
-            request.SurveyId,
+            survey.Id,
             participant.Id,
             cancellationToken);
 

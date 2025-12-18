@@ -1,12 +1,13 @@
 using System.Linq;
+using SurveyBackend.Domain.Common;
 
 namespace SurveyBackend.Domain.Surveys;
 
-public class Answer
+public class Answer : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid ParticipationId { get; private set; }
-    public Guid QuestionId { get; private set; }
+    public int Id { get; private set; }
+    public int ParticipationId { get; private set; }
+    public int QuestionId { get; private set; }
     public string? TextValue { get; private set; }
 
     public Participation Participation { get; private set; } = null!;
@@ -18,17 +19,16 @@ public class Answer
     {
     }
 
-    internal Answer(Guid id, Guid participationId, Guid questionId, string? textValue)
+    internal Answer(int participationId, int questionId, string? textValue)
     {
-        Id = id;
         ParticipationId = participationId;
         QuestionId = questionId;
         TextValue = textValue?.Trim();
     }
 
-    public AnswerOption AddSelectedOption(Guid id, Guid questionOptionId)
+    public AnswerOption AddSelectedOption(int questionOptionId)
     {
-        var selection = new AnswerOption(id, Id, questionOptionId);
+        var selection = new AnswerOption(Id, questionOptionId);
         SelectedOptions.Add(selection);
         return selection;
     }
@@ -38,9 +38,9 @@ public class Answer
         TextValue = textValue?.Trim();
     }
 
-    public void ReplaceSelectedOptions(IEnumerable<Guid>? optionIds)
+    public void ReplaceSelectedOptions(IEnumerable<int>? optionIds)
     {
-        var newOptionIds = (optionIds ?? Enumerable.Empty<Guid>()).Distinct().ToList();
+        var newOptionIds = (optionIds ?? Enumerable.Empty<int>()).Distinct().ToList();
 
         // Remove options that are no longer selected
         var optionsToRemove = SelectedOptions
@@ -58,7 +58,7 @@ public class Answer
 
         foreach (var optionId in optionIdsToAdd)
         {
-            SelectedOptions.Add(new AnswerOption(Guid.NewGuid(), Id, optionId));
+            SelectedOptions.Add(new AnswerOption(Id, optionId));
         }
     }
 }

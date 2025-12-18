@@ -14,7 +14,7 @@ public sealed class ParticipationRepository : IParticipationRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Participation?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Participation?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Participations
             .Include(p => p.Participant)
@@ -28,14 +28,14 @@ public sealed class ParticipationRepository : IParticipationRepository
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
-    public async Task<Participation?> GetBySurveyAndParticipantAsync(Guid surveyId, Guid participantId, CancellationToken cancellationToken)
+    public async Task<Participation?> GetBySurveyAndParticipantAsync(int surveyId, int participantId, CancellationToken cancellationToken)
     {
         return await _dbContext.Participations
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.SurveyId == surveyId && p.ParticipantId == participantId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Participation>> GetBySurveyIdAsync(Guid surveyId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Participation>> GetBySurveyIdAsync(int surveyId, CancellationToken cancellationToken)
     {
         return await _dbContext.Participations
             .Include(p => p.Participant)
@@ -51,7 +51,7 @@ public sealed class ParticipationRepository : IParticipationRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Participation?> GetByParticipantNameAsync(Guid surveyId, string participantName, CancellationToken cancellationToken)
+    public async Task<Participation?> GetByParticipantNameAsync(int surveyId, string participantName, CancellationToken cancellationToken)
     {
         return await _dbContext.Participations
             .Include(p => p.Participant)

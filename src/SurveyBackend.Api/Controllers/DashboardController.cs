@@ -23,8 +23,8 @@ public class DashboardController : ControllerBase
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpGet("department/{departmentId:guid}")]
-    public async Task<ActionResult<DepartmentDashboardDto>> GetDepartmentStats(Guid departmentId, CancellationToken cancellationToken)
+    [HttpGet("department/{departmentId:int}")]
+    public async Task<ActionResult<DepartmentDashboardDto>> GetDepartmentStats(int departmentId, CancellationToken cancellationToken)
     {
         var query = new GetDepartmentDashboardQuery(departmentId);
         var response = await _mediator.SendAsync<GetDepartmentDashboardQuery, DepartmentDashboardDto>(query, cancellationToken);

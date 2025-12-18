@@ -15,7 +15,7 @@ public sealed class GetDepartmentDashboardQueryHandler : ICommandHandler<GetDepa
     public async Task<DepartmentDashboardDto> HandleAsync(GetDepartmentDashboardQuery request, CancellationToken cancellationToken)
     {
         var surveyStats = await _surveyRepository.GetSurveyStatsByDepartmentAsync(request.DepartmentId, cancellationToken);
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
 
         var totalSurveys = surveyStats.Count;
         var activeSurveys = surveyStats.Count(s =>

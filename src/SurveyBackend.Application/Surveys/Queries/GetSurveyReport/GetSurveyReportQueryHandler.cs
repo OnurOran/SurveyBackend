@@ -50,7 +50,7 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                 ParticipationId = p.Id,
                 ParticipantName = p.Participant?.LdapUsername ?? "Unknown",
                 IsCompleted = p.CompletedAt.HasValue,
-                StartedAt = p.StartedAt.UtcDateTime
+                StartedAt = p.StartedAt
             }).ToList()
             : new List<ParticipantSummaryDto>();
 
@@ -76,9 +76,9 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
             IntroText = survey.IntroText,
             OutroText = survey.OutroText,
             AccessType = survey.AccessType.ToString(),
-            StartDate = survey.StartDate?.UtcDateTime,
-            EndDate = survey.EndDate?.UtcDateTime,
-            IsActive = survey.IsActive,
+            StartDate = survey.StartDate,
+            EndDate = survey.EndDate,
+            IsActive = survey.IsPublished,
             TotalParticipations = totalParticipations,
             CompletedParticipations = completedParticipations,
             CompletionRate = Math.Round(completionRate, 2),
@@ -240,7 +240,7 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                     ParticipationId = a.ParticipationId,
                     ParticipantName = participantName,
                     TextValue = a.TextValue ?? string.Empty,
-                    SubmittedAt = participation?.CompletedAt?.UtcDateTime ?? participation?.StartedAt.UtcDateTime ?? DateTime.UtcNow
+                    SubmittedAt = participation?.CompletedAt ?? participation?.StartedAt ?? DateTime.Now
                 };
             })
             .OrderByDescending(r => r.SubmittedAt)
@@ -285,7 +285,7 @@ public sealed class GetSurveyReportQueryHandler : ICommandHandler<GetSurveyRepor
                     FileName = a.Attachment.FileName,
                     ContentType = a.Attachment.ContentType,
                     SizeBytes = a.Attachment.SizeBytes,
-                    SubmittedAt = participation?.CompletedAt?.UtcDateTime ?? participation?.StartedAt.UtcDateTime ?? DateTime.UtcNow
+                    SubmittedAt = participation?.CompletedAt ?? participation?.StartedAt ?? DateTime.Now
                 };
             })
             .OrderByDescending(r => r.SubmittedAt)

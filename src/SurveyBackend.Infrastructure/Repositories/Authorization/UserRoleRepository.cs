@@ -16,7 +16,7 @@ public sealed class UserRoleRepository : IUserRoleRepository
         _dbContext = dbContext;
     }
 
-    public async Task AssignRoleAsync(Guid userId, Guid roleId, Guid departmentId, CancellationToken cancellationToken)
+    public async Task AssignRoleAsync(int userId, int roleId, int departmentId, CancellationToken cancellationToken)
     {
         if (await _dbContext.UserRoles.AnyAsync(
                 ur => ur.UserId == userId && ur.RoleId == roleId && ur.DepartmentId == departmentId,
@@ -29,7 +29,7 @@ public sealed class UserRoleRepository : IUserRoleRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveRoleAsync(Guid userId, Guid roleId, Guid departmentId, CancellationToken cancellationToken)
+    public async Task RemoveRoleAsync(int userId, int roleId, int departmentId, CancellationToken cancellationToken)
     {
         var userRole = await _dbContext.UserRoles
             .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId && ur.DepartmentId == departmentId, cancellationToken);
@@ -42,7 +42,7 @@ public sealed class UserRoleRepository : IUserRoleRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task RemoveAllRolesAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task RemoveAllRolesAsync(int userId, CancellationToken cancellationToken)
     {
         var roles = await _dbContext.UserRoles
             .Where(ur => ur.UserId == userId)
@@ -57,7 +57,7 @@ public sealed class UserRoleRepository : IUserRoleRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<string>> GetPermissionsForUserAsync(Guid userId, Guid departmentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<string>> GetPermissionsForUserAsync(int userId, int departmentId, CancellationToken cancellationToken)
     {
         return await _dbContext.UserRoles
             .Where(ur => ur.UserId == userId && ur.DepartmentId == departmentId)
@@ -67,7 +67,7 @@ public sealed class UserRoleRepository : IUserRoleRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<bool> UserHasRoleAsync(Guid userId, string roleName, Guid departmentId, CancellationToken cancellationToken)
+    public async Task<bool> UserHasRoleAsync(int userId, string roleName, int departmentId, CancellationToken cancellationToken)
     {
         return await _dbContext.UserRoles
             .AnyAsync(ur => ur.UserId == userId && ur.DepartmentId == departmentId && ur.Role.Name == roleName, cancellationToken);

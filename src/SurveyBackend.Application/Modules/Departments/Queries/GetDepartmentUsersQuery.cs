@@ -4,4 +4,4 @@ using SurveyBackend.Application.Modules.Departments.DTOs;
 
 namespace SurveyBackend.Application.Modules.Departments.Queries;
 
-public sealed record GetDepartmentUsersQuery(Guid DepartmentId) : ICommand<IReadOnlyCollection<DepartmentUserDto>>, IDepartmentScopedCommand;
+public sealed record GetDepartmentUsersQuery(int DepartmentId) : ICommand<IReadOnlyCollection<DepartmentUserDto>>, IDepartmentScopedCommand;

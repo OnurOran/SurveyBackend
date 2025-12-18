@@ -21,8 +21,8 @@ public class AttachmentsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Download(Guid id, [FromQuery] bool download = false, CancellationToken cancellationToken = default)
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Download(int id, [FromQuery] bool download = false, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -52,8 +52,8 @@ public class AttachmentsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("answers/{id:guid}")]
-    public async Task<IActionResult> DownloadAnswerAttachment(Guid id, CancellationToken cancellationToken)
+    [HttpGet("answers/{id:int}")]
+    public async Task<IActionResult> DownloadAnswerAttachment(int id, CancellationToken cancellationToken)
     {
         try
         {

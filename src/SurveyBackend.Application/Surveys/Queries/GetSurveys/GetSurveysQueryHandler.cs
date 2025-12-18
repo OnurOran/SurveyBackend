@@ -18,12 +18,12 @@ public sealed class GetSurveysQueryHandler : ICommandHandler<GetSurveysQuery, IR
     {
         var surveys = await _surveyRepository.GetAllAsync(cancellationToken);
 
-        var creatorCache = new Dictionary<Guid, string>();
+        var creatorCache = new Dictionary<int, string>();
 
         var result = new List<SurveyListItemDto>(surveys.Count);
         foreach (var survey in surveys)
         {
-            var createdBy = await ResolveCreatorAsync(survey.CreatedBy, creatorCache, cancellationToken);
+            var createdBy = await ResolveCreatorAsync(survey.CreateEmployeeId, creatorCache, cancellationToken);
 
             result.Add(new SurveyListItemDto(
                 survey.Id,
@@ -31,8 +31,8 @@ public sealed class GetSurveysQueryHandler : ICommandHandler<GetSurveysQuery, IR
                 survey.Description,
                 survey.DepartmentId,
                 survey.AccessType,
-                survey.IsActive,
-                survey.CreatedAt,
+                survey.IsPublished,
+                survey.CreateDate,
                 survey.StartDate,
                 survey.EndDate,
                 createdBy));
@@ -41,11 +41,11 @@ public sealed class GetSurveysQueryHandler : ICommandHandler<GetSurveysQuery, IR
         return result;
     }
 
-    private async Task<string> ResolveCreatorAsync(string createdByValue, Dictionary<Guid, string> cache, CancellationToken cancellationToken)
+    private async Task<string> ResolveCreatorAsync(string? createdByValue, Dictionary<int, string> cache, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(createdByValue, out var userId))
+        if (string.IsNullOrWhiteSpace(createdByValue) || !int.TryParse(createdByValue, out var userId))
         {
-            return createdByValue;
+            return createdByValue ?? "Bilinmeyen";
         }
 
         if (cache.TryGetValue(userId, out var cached))

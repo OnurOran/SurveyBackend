@@ -4,8 +4,8 @@ namespace SurveyBackend.Application.Interfaces.Identity;
 
 public interface ICurrentUserService
 {
-    Guid? UserId { get; }
-    Guid? DepartmentId { get; }
+    int? UserId { get; }
+    int? DepartmentId { get; }
     bool IsAuthenticated { get; }
     bool IsSuperAdmin { get; }
     string? Username { get; }

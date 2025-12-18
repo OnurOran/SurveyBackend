@@ -1,16 +1,17 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Surveys;
 
-public class AnswerAttachment
+public class AnswerAttachment : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid AnswerId { get; private set; }
-    public Guid SurveyId { get; private set; }
-    public Guid DepartmentId { get; private set; }
+    public int Id { get; private set; }
+    public int AnswerId { get; private set; }
+    public int SurveyId { get; private set; }
+    public int DepartmentId { get; private set; }
     public string FileName { get; private set; } = null!;
     public string ContentType { get; private set; } = null!;
     public long SizeBytes { get; private set; }
     public string StoragePath { get; private set; } = null!;
-    public DateTimeOffset CreatedAt { get; private set; }
 
     public Answer Answer { get; private set; } = null!;
 
@@ -18,9 +19,8 @@ public class AnswerAttachment
     {
     }
 
-    private AnswerAttachment(Guid id, Guid answerId, Guid surveyId, Guid departmentId, string fileName, string contentType, long sizeBytes, string storagePath, DateTimeOffset createdAt)
+    private AnswerAttachment(int answerId, int surveyId, int departmentId, string fileName, string contentType, long sizeBytes, string storagePath)
     {
-        Id = id;
         AnswerId = answerId;
         SurveyId = surveyId;
         DepartmentId = departmentId;
@@ -28,11 +28,10 @@ public class AnswerAttachment
         ContentType = contentType;
         SizeBytes = sizeBytes;
         StoragePath = storagePath;
-        CreatedAt = createdAt;
     }
 
-    public static AnswerAttachment Create(Guid id, Guid answerId, Guid surveyId, Guid departmentId, string fileName, string contentType, long sizeBytes, string storagePath, DateTimeOffset createdAt)
+    public static AnswerAttachment Create(int answerId, int surveyId, int departmentId, string fileName, string contentType, long sizeBytes, string storagePath)
     {
-        return new AnswerAttachment(id, answerId, surveyId, departmentId, fileName, contentType, sizeBytes, storagePath, createdAt);
+        return new AnswerAttachment(answerId, surveyId, departmentId, fileName, contentType, sizeBytes, storagePath);
     }
 }

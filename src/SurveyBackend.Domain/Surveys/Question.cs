@@ -1,11 +1,12 @@
+using SurveyBackend.Domain.Common;
 using SurveyBackend.Domain.Enums;
 
 namespace SurveyBackend.Domain.Surveys;
 
-public class Question
+public class Question : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid SurveyId { get; private set; }
+    public int Id { get; private set; }
+    public int SurveyId { get; private set; }
     public string Text { get; private set; } = null!;
     public string? Description { get; private set; }
     public int Order { get; private set; }
@@ -21,9 +22,8 @@ public class Question
     {
     }
 
-    private Question(Guid id, Guid surveyId, string text, int order, QuestionType type, bool isRequired, string? description)
+    private Question(int surveyId, string text, int order, QuestionType type, bool isRequired, string? description)
     {
-        Id = id;
         SurveyId = surveyId;
         Text = text;
         Description = description;
@@ -32,14 +32,14 @@ public class Question
         IsRequired = isRequired;
     }
 
-    internal static Question Create(Guid id, Guid surveyId, string text, int order, QuestionType type, bool isRequired, string? description)
+    internal static Question Create(int surveyId, string text, int order, QuestionType type, bool isRequired, string? description)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             throw new ArgumentException("Question text cannot be empty.", nameof(text));
         }
 
-        return new Question(id, surveyId, text.Trim(), order, type, isRequired, description?.Trim());
+        return new Question(surveyId, text.Trim(), order, type, isRequired, description?.Trim());
     }
 
     public void SetAllowedAttachmentContentTypes(IEnumerable<string>? contentTypes)
@@ -68,9 +68,9 @@ public class Question
             .ToArray();
     }
 
-    public QuestionOption AddOption(Guid id, string text, int order, int? value = null)
+    public QuestionOption AddOption(string text, int order, int? value = null)
     {
-        var option = QuestionOption.Create(id, Id, text, order, value);
+        var option = QuestionOption.Create(Id, text, order, value);
         Options.Add(option);
         return option;
     }

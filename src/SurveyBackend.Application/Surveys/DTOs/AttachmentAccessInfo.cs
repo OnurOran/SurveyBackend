@@ -3,13 +3,13 @@ using SurveyBackend.Domain.Enums;
 namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record AttachmentAccessInfo(
-    Guid AttachmentId,
-    Guid SurveyId,
-    Guid DepartmentId,
+    int AttachmentId,
+    int SurveyId,
+    int DepartmentId,
     AccessType AccessType,
     bool IsActive,
-    DateTimeOffset? StartDate,
-    DateTimeOffset? EndDate,
+    DateTime? StartDate,
+    DateTime? EndDate,
     string FileName,
     string ContentType,
     long SizeBytes,

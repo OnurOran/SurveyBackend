@@ -25,20 +25,20 @@ public sealed class SurveyRepository : ISurveyRepository
     {
         return await _dbContext.Surveys
             .AsNoTracking()
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.CreateDate)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Survey>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Survey>> GetByDepartmentAsync(int departmentId, CancellationToken cancellationToken)
     {
         return await _dbContext.Surveys
             .AsNoTracking()
             .Where(s => s.DepartmentId == departmentId)
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.CreateDate)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<Survey?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Survey?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Surveys
             .Include(s => s.Attachment)
@@ -62,6 +62,30 @@ public sealed class SurveyRepository : ISurveyRepository
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
+    public async Task<Survey?> GetBySurveyNumberAsync(int surveyNumber, CancellationToken cancellationToken)
+    {
+        return await _dbContext.Surveys
+            .Include(s => s.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.DependentQuestions)
+                        .ThenInclude(dq => dq.ChildQuestion)
+                            .ThenInclude(cq => cq.Options)
+                                .ThenInclude(o => o.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.DependentQuestions)
+                        .ThenInclude(dq => dq.ChildQuestion)
+                            .ThenInclude(cq => cq.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.Attachment)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(s => s.Id == surveyNumber, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsAsync(CancellationToken cancellationToken)
     {
         var data = await _dbContext.Surveys
@@ -71,21 +95,21 @@ public sealed class SurveyRepository : ISurveyRepository
                 s.Id,
                 s.Title,
                 s.DepartmentId,
-                s.IsActive,
-                s.CreatedAt,
+                s.IsPublished,
+                s.CreateDate,
                 s.StartDate,
                 s.EndDate,
                 ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
             })
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.CreateDate)
             .ToListAsync(cancellationToken);
 
         return data
-            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.StartDate, s.EndDate, s.ParticipationCount))
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsPublished, s.CreateDate, s.StartDate, s.EndDate, s.ParticipationCount))
             .ToList();
     }
 
-    public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(int departmentId, CancellationToken cancellationToken)
     {
         var data = await _dbContext.Surveys
             .AsNoTracking()
@@ -95,17 +119,17 @@ public sealed class SurveyRepository : ISurveyRepository
                 s.Id,
                 s.Title,
                 s.DepartmentId,
-                s.IsActive,
-                s.CreatedAt,
+                s.IsPublished,
+                s.CreateDate,
                 s.StartDate,
                 s.EndDate,
                 ParticipationCount = _dbContext.Participations.Count(p => p.SurveyId == s.Id)
             })
-            .OrderByDescending(s => s.CreatedAt)
+            .OrderByDescending(s => s.CreateDate)
             .ToListAsync(cancellationToken);
 
         return data
-            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsActive, s.CreatedAt, s.StartDate, s.EndDate, s.ParticipationCount))
+            .Select(s => new SurveyStats(s.Id, s.Title, s.DepartmentId, s.IsPublished, s.CreateDate, s.StartDate, s.EndDate, s.ParticipationCount))
             .ToList();
     }
 

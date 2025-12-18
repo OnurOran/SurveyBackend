@@ -1,3 +1,3 @@
 namespace SurveyBackend.Application.Modules.Authorization.Commands;
 
-public sealed record RemoveRoleFromUserCommand(Guid UserId, Guid RoleId) : ICommand<bool>;
+public sealed record RemoveRoleFromUserCommand(int UserId, int RoleId) : ICommand<bool>;

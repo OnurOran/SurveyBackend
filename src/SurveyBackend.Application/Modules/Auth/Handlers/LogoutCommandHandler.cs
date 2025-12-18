@@ -27,7 +27,7 @@ public sealed class LogoutCommandHandler : ICommandHandler<LogoutCommand, bool>
             return false;
         }
 
-        refreshToken.Revoke(DateTimeOffset.UtcNow);
+        refreshToken.Revoke(DateTime.Now);
         await _refreshTokenRepository.UpdateAsync(refreshToken, cancellationToken);
 
         return true;

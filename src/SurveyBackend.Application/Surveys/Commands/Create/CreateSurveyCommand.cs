@@ -11,4 +11,4 @@ public sealed record CreateSurveyCommand(
     string? OutroText,
     AccessType AccessType,
     List<CreateQuestionDto>? Questions,
-    AttachmentUploadDto? Attachment = null) : ICommand<Guid>;
+    AttachmentUploadDto? Attachment = null) : ICommand<int>;

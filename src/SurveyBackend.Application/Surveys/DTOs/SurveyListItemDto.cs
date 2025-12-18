@@ -3,13 +3,13 @@ using SurveyBackend.Domain.Enums;
 namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record SurveyListItemDto(
-    Guid Id,
+    int Id,
     string Title,
     string? Description,
-    Guid DepartmentId,
+    int DepartmentId,
     AccessType AccessType,
     bool IsActive,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset? StartDate,
-    DateTimeOffset? EndDate,
+    DateTime CreatedAt,
+    DateTime? StartDate,
+    DateTime? EndDate,
     string CreatedBy);

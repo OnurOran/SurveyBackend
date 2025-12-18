@@ -7,7 +7,7 @@ public interface IRoleRepository
 {
     Task<IReadOnlyList<Role>> GetAllAsync(CancellationToken cancellationToken);
     Task<Role?> GetByNameAsync(string name, CancellationToken cancellationToken);
-    Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Role?> GetByIdAsync(int id, CancellationToken cancellationToken);
     Task AddAsync(Role role, CancellationToken cancellationToken);
     Task UpdateAsync(Role role, CancellationToken cancellationToken);
 }

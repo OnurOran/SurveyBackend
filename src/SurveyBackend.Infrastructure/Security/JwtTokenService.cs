@@ -25,7 +25,7 @@ public sealed class JwtTokenService : IJwtTokenService
 
     public Task<JwtTokenResult> GenerateTokensAsync(User user, IEnumerable<string> permissions, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
         var expiresAt = now.AddMinutes(_settings.AccessTokenMinutes);
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.SecretKey));
@@ -46,7 +46,7 @@ public sealed class JwtTokenService : IJwtTokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = expiresAt.UtcDateTime,
+            Expires = expiresAt,
             Issuer = _settings.Issuer,
             Audience = _settings.Audience,
             SigningCredentials = signingCredentials

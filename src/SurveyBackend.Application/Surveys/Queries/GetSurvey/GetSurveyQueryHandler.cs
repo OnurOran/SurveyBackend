@@ -60,9 +60,9 @@ public sealed class GetSurveyQueryHandler : ICommandHandler<GetSurveyQuery, Surv
 
     private static bool IsAvailable(Survey survey)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
 
-        if (!survey.IsActive)
+        if (!survey.IsPublished)
         {
             return false;
         }

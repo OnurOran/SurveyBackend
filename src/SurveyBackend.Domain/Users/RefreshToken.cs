@@ -1,38 +1,37 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Users;
 
-public class RefreshToken
+public class RefreshToken : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid UserId { get; private set; }
+    public int Id { get; private set; }
+    public int UserId { get; private set; }
     public string Token { get; private set; } = null!;
-    public DateTimeOffset ExpiresAt { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; }
-    public DateTimeOffset? RevokedAt { get; private set; }
+    public DateTime ExpiresAt { get; private set; }
+    public DateTime? RevokedAt { get; private set; }
     public User? User { get; private set; }
 
-    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
+    public bool IsExpired => DateTime.Now >= ExpiresAt;
     public bool IsRevoked => RevokedAt.HasValue;
-    public bool IsActive => !IsExpired && !IsRevoked;
+    public bool IsValid => !IsExpired && !IsRevoked;
 
     private RefreshToken()
     {
     }
 
-    private RefreshToken(Guid id, Guid userId, string token, DateTimeOffset expiresAt, DateTimeOffset createdAt)
+    private RefreshToken(int userId, string token, DateTime expiresAt)
     {
-        Id = id;
         UserId = userId;
         Token = token;
         ExpiresAt = expiresAt;
-        CreatedAt = createdAt;
     }
 
-    public static RefreshToken Create(Guid id, Guid userId, string token, DateTimeOffset expiresAt, DateTimeOffset createdAt)
+    public static RefreshToken Create(int userId, string token, DateTime expiresAt)
     {
-        return new RefreshToken(id, userId, token, expiresAt, createdAt);
+        return new RefreshToken(userId, token, expiresAt);
     }
 
-    public void Revoke(DateTimeOffset revokedAt)
+    public void Revoke(DateTime revokedAt)
     {
         RevokedAt = revokedAt;
     }

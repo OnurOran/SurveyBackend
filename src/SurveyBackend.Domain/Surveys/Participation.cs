@@ -1,14 +1,15 @@
 using System.Linq;
+using SurveyBackend.Domain.Common;
 
 namespace SurveyBackend.Domain.Surveys;
 
-public class Participation
+public class Participation : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid SurveyId { get; private set; }
-    public Guid ParticipantId { get; private set; }
-    public DateTimeOffset StartedAt { get; private set; }
-    public DateTimeOffset? CompletedAt { get; private set; }
+    public int Id { get; private set; }
+    public int SurveyId { get; private set; }
+    public int ParticipantId { get; private set; }
+    public DateTime StartedAt { get; private set; }
+    public DateTime? CompletedAt { get; private set; }
     public string? IpAddress { get; private set; }
 
     public Participant Participant { get; private set; } = null!;
@@ -18,31 +19,30 @@ public class Participation
     {
     }
 
-    private Participation(Guid id, Guid surveyId, Guid participantId, DateTimeOffset startedAt, string? ipAddress)
+    private Participation(int surveyId, int participantId, DateTime startedAt, string? ipAddress)
     {
-        Id = id;
         SurveyId = surveyId;
         ParticipantId = participantId;
         StartedAt = startedAt;
         IpAddress = ipAddress;
     }
 
-    public static Participation Start(Guid id, Guid surveyId, Guid participantId, DateTimeOffset startedAt, string? ipAddress = null)
+    public static Participation Start(int surveyId, int participantId, DateTime startedAt, string? ipAddress = null)
     {
-        return new Participation(id, surveyId, participantId, startedAt, ipAddress);
+        return new Participation(surveyId, participantId, startedAt, ipAddress);
     }
 
-    public void Complete(DateTimeOffset completedAt)
+    public void Complete(DateTime completedAt)
     {
         CompletedAt = completedAt;
     }
 
-    public Answer AddOrUpdateAnswer(Guid id, Guid questionId, string? textValue, IEnumerable<Guid>? optionIds = null)
+    public Answer AddOrUpdateAnswer(int questionId, string? textValue, IEnumerable<int>? optionIds = null)
     {
         var answer = Answers.FirstOrDefault(a => a.QuestionId == questionId);
         if (answer is null)
         {
-            answer = new Answer(id, Id, questionId, textValue);
+            answer = new Answer(Id, questionId, textValue);
             Answers.Add(answer);
         }
         else

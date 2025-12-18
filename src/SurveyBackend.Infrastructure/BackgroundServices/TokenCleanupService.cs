@@ -53,7 +53,7 @@ public sealed class TokenCleanupService : BackgroundService
         try
         {
             // Delete tokens that expired more than 30 days ago
-            var cutoffDate = DateTimeOffset.UtcNow.AddDays(-30);
+            var cutoffDate = DateTime.Now.AddDays(-30);
             var deletedCount = await refreshTokenRepository.DeleteExpiredTokensAsync(cutoffDate, cancellationToken);
 
             _logger.LogInformation("Cleaned up {Count} expired refresh tokens.", deletedCount);

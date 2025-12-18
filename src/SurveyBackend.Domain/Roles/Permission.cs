@@ -1,8 +1,10 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Roles;
 
-public class Permission
+public class Permission : CommonEntity
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
 
@@ -10,10 +12,19 @@ public class Permission
     {
     }
 
-    public Permission(Guid id, string name, string description)
+    public Permission(int id, string name, string description)
     {
         Id = id;
         Name = name;
         Description = description;
+    }
+
+    public static Permission Create(string name, string description)
+    {
+        return new Permission
+        {
+            Name = name,
+            Description = description
+        };
     }
 }

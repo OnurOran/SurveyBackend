@@ -1,22 +1,22 @@
+using SurveyBackend.Domain.Common;
 using SurveyBackend.Domain.Enums;
 
 namespace SurveyBackend.Domain.Surveys;
 
-public class Survey
+public class Survey : CommonEntity
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
+    public string Slug { get; private set; } = null!;
     public string Title { get; private set; } = null!;
     public string? Description { get; private set; }
     public string? IntroText { get; private set; }
     public string? ConsentText { get; private set; }
     public string? OutroText { get; private set; }
-    public string CreatedBy { get; private set; } = null!;
-    public Guid DepartmentId { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; }
-    public bool IsActive { get; private set; }
+    public int DepartmentId { get; private set; }
+    public bool IsPublished { get; private set; }
     public AccessType AccessType { get; private set; }
-    public DateTimeOffset? StartDate { get; private set; }
-    public DateTimeOffset? EndDate { get; private set; }
+    public DateTime? StartDate { get; private set; }
+    public DateTime? EndDate { get; private set; }
 
     public Attachment? Attachment { get; private set; }
     public ICollection<Question> Questions { get; private set; } = new List<Question>();
@@ -25,38 +25,68 @@ public class Survey
     {
     }
 
-    private Survey(Guid id, string title, string? description, string? introText, string? consentText, string? outroText, string createdBy, Guid departmentId, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate, DateTimeOffset? endDate)
+    private Survey(string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate, DateTime? endDate)
     {
-        Id = id;
+        Slug = GenerateSlug(title);
         Title = title;
         Description = description;
         IntroText = introText;
         ConsentText = consentText;
         OutroText = outroText;
-        CreatedBy = createdBy;
         DepartmentId = departmentId;
         AccessType = accessType;
-        CreatedAt = createdAt;
         StartDate = startDate;
         EndDate = endDate;
-        IsActive = false;
+        IsPublished = false;
     }
 
-    public static Survey Create(Guid id, string title, string? description, string? introText, string? consentText, string? outroText, string createdBy, Guid departmentId, AccessType accessType, DateTimeOffset createdAt, DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
+    private static string GenerateSlug(string title)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            return "anket";
+        }
+
+        // Turkish character replacements
+        var slug = title.ToLowerInvariant()
+            .Replace('ı', 'i')
+            .Replace('ğ', 'g')
+            .Replace('ü', 'u')
+            .Replace('ş', 's')
+            .Replace('ö', 'o')
+            .Replace('ç', 'c')
+            .Replace('İ', 'i')
+            .Replace('Ğ', 'g')
+            .Replace('Ü', 'u')
+            .Replace('Ş', 's')
+            .Replace('Ö', 'o')
+            .Replace('Ç', 'c');
+
+        // Replace non-alphanumeric with hyphens
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9]+", "-");
+
+        // Remove leading/trailing hyphens and multiple consecutive hyphens
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-").Trim('-');
+
+        // Limit length to 100 characters
+        if (slug.Length > 100)
+        {
+            slug = slug.Substring(0, 100).TrimEnd('-');
+        }
+
+        return string.IsNullOrWhiteSpace(slug) ? "anket" : slug;
+    }
+
+    public static Survey Create(string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate = null, DateTime? endDate = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
             throw new ArgumentException("Survey title cannot be empty.", nameof(title));
         }
 
-        if (string.IsNullOrWhiteSpace(createdBy))
+        if (departmentId <= 0)
         {
-            throw new ArgumentException("CreatedBy cannot be empty.", nameof(createdBy));
-        }
-
-        if (departmentId == Guid.Empty)
-        {
-            throw new ArgumentException("DepartmentId cannot be empty.", nameof(departmentId));
+            throw new ArgumentException("DepartmentId must be greater than 0.", nameof(departmentId));
         }
 
         if (startDate.HasValue && endDate.HasValue && endDate <= startDate)
@@ -64,10 +94,10 @@ public class Survey
             throw new ArgumentException("EndDate must be later than StartDate when both are provided.", nameof(endDate));
         }
 
-        return new Survey(id, title.Trim(), description?.Trim(), introText?.Trim(), consentText?.Trim(), outroText?.Trim(), createdBy.Trim(), departmentId, accessType, createdAt, startDate, endDate);
+        return new Survey(title.Trim(), description?.Trim(), introText?.Trim(), consentText?.Trim(), outroText?.Trim(), departmentId, accessType, startDate, endDate);
     }
 
-    public void Publish(DateTimeOffset? startDate = null, DateTimeOffset? endDate = null)
+    public void Publish(DateTime? startDate = null, DateTime? endDate = null)
     {
         var effectiveStart = startDate ?? StartDate;
         var effectiveEnd = endDate ?? EndDate;
@@ -79,13 +109,29 @@ public class Survey
 
         StartDate = effectiveStart;
         EndDate = effectiveEnd;
-        IsActive = true;
+        IsPublished = true;
     }
 
-    public Question AddQuestion(Guid id, string text, QuestionType type, int order, bool isRequired, string? description = null)
+    public Question AddQuestion(string text, QuestionType type, int order, bool isRequired, string? description = null)
     {
-        var question = Question.Create(id, Id, text, order, type, isRequired, description);
+        var question = Question.Create(Id, text, order, type, isRequired, description);
         Questions.Add(question);
         return question;
+    }
+
+    public void Update(string title, string? description, string? introText, string? consentText, string? outroText, AccessType accessType)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            throw new ArgumentException("Survey title cannot be empty.", nameof(title));
+        }
+
+        Title = title.Trim();
+        Slug = GenerateSlug(title);
+        Description = description?.Trim();
+        IntroText = introText?.Trim();
+        ConsentText = consentText?.Trim();
+        OutroText = outroText?.Trim();
+        AccessType = accessType;
     }
 }

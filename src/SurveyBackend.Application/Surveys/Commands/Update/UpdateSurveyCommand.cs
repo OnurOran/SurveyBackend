@@ -4,7 +4,7 @@ using SurveyBackend.Domain.Enums;
 namespace SurveyBackend.Application.Surveys.Commands.Update;
 
 public sealed record UpdateSurveyCommand(
-    Guid SurveyId,
+    int SurveyId,
     string Title,
     string? Description,
     string? IntroText,

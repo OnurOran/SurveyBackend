@@ -57,15 +57,13 @@ public sealed class AnswerAttachmentService
         }
 
         var attachment = AnswerAttachment.Create(
-            Guid.NewGuid(),
             answer.Id,
             survey.Id,
             survey.DepartmentId,
             saveResult.FileName,
             saveResult.ContentType,
             saveResult.SizeBytes,
-            saveResult.StoragePath,
-            DateTimeOffset.UtcNow);
+            saveResult.StoragePath);
 
         await _repository.AddAsync(attachment, cancellationToken);
         return attachment;

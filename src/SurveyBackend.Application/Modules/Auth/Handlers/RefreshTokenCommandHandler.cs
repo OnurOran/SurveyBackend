@@ -33,7 +33,7 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
     public async Task<AuthTokensDto> HandleAsync(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var existingToken = await _refreshTokenRepository.GetByTokenAsync(request.RefreshToken, cancellationToken);
-        if (existingToken is null || !existingToken.IsActive)
+        if (existingToken is null || !existingToken.IsValid)
         {
             throw new UnauthorizedAccessException("Geçersiz refresh token.");
         }
@@ -41,13 +41,13 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
         var user = await _userRepository.GetByIdAsync(existingToken.UserId, cancellationToken)
                    ?? throw new InvalidOperationException("Kullanıcı bulunamadı.");
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
         existingToken.Revoke(now);
         await _refreshTokenRepository.UpdateAsync(existingToken, cancellationToken);
 
         var permissions = await ResolvePermissionsAsync(user, cancellationToken);
         var tokenResult = await _jwtTokenService.GenerateTokensAsync(user, permissions, cancellationToken);
-        var newRefreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt, now);
+        var newRefreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt);
         await _refreshTokenRepository.AddAsync(newRefreshToken, cancellationToken);
 
         var refreshTokenDto = AuthMapper.ToRefreshTokenDto(newRefreshToken);

@@ -59,7 +59,7 @@ public sealed class GetAnswerAttachmentQueryHandler : ICommandHandler<GetAnswerA
             return false;
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
         if (info.StartDate.HasValue && info.StartDate.Value > now)
         {
             return false;

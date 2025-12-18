@@ -53,8 +53,8 @@ public class SurveysController : ControllerBase
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpGet("department/{departmentId:guid}")]
-    public async Task<ActionResult<IReadOnlyCollection<SurveyListItemDto>>> GetByDepartment(Guid departmentId, CancellationToken cancellationToken)
+    [HttpGet("department/{departmentId:int}")]
+    public async Task<ActionResult<IReadOnlyCollection<SurveyListItemDto>>> GetByDepartment(int departmentId, CancellationToken cancellationToken)
     {
         var query = new GetDepartmentSurveysQuery(departmentId);
         var response = await _mediator.SendAsync<GetDepartmentSurveysQuery, IReadOnlyCollection<SurveyListItemDto>>(query, cancellationToken);
@@ -65,13 +65,13 @@ public class SurveysController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateSurveyCommand command, CancellationToken cancellationToken)
     {
-        var surveyId = await _mediator.SendAsync<CreateSurveyCommand, Guid>(command, cancellationToken);
+        var surveyId = await _mediator.SendAsync<CreateSurveyCommand, int>(command, cancellationToken);
         return CreatedAtAction(nameof(GetSurvey), new { id = surveyId }, null);
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSurveyRequest request, CancellationToken cancellationToken)
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateSurveyRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateSurveyCommand(
             id,
@@ -89,8 +89,8 @@ public class SurveysController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<SurveyDetailDto>> GetSurvey(Guid id, CancellationToken cancellationToken)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<SurveyDetailDto>> GetSurvey(int id, CancellationToken cancellationToken)
     {
         var response = await _mediator.SendAsync<GetSurveyQuery, SurveyDetailDto?>(new GetSurveyQuery(id), cancellationToken);
         if (response is null)
@@ -101,9 +101,45 @@ public class SurveysController : ControllerBase
         return Ok(response);
     }
 
+    [AllowAnonymous]
+    [HttpGet("by-slug/{slug}")]
+    public async Task<ActionResult<SurveyDetailDto>> GetSurveyBySlug(string slug, CancellationToken cancellationToken)
+    {
+        // Parse survey number from slug (format: "{slug}-{number}")
+        var lastHyphenIndex = slug.LastIndexOf('-');
+        if (lastHyphenIndex == -1 || lastHyphenIndex == slug.Length - 1)
+        {
+            return BadRequest("Geçersiz anket URL formatı.");
+        }
+
+        var numberPart = slug.Substring(lastHyphenIndex + 1);
+        if (!int.TryParse(numberPart, out var surveyNumber))
+        {
+            return BadRequest("Geçersiz anket URL formatı.");
+        }
+
+        // Fetch survey by number, then use existing query to get full details
+        var surveyRepository = HttpContext.RequestServices.GetRequiredService<SurveyBackend.Application.Interfaces.Persistence.ISurveyRepository>();
+        var survey = await surveyRepository.GetBySurveyNumberAsync(surveyNumber, cancellationToken);
+
+        if (survey is null)
+        {
+            return NotFound();
+        }
+
+        // Use existing GetSurveyQuery to get full details with authorization checks
+        var response = await _mediator.SendAsync<GetSurveyQuery, SurveyDetailDto?>(new GetSurveyQuery(survey.Id), cancellationToken);
+        if (response is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(response);
+    }
+
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpPost("{id:guid}/questions")]
-    public async Task<IActionResult> AddQuestion(Guid id, [FromBody] CreateQuestionDto questionDto, CancellationToken cancellationToken)
+    [HttpPost("{id:int}/questions")]
+    public async Task<IActionResult> AddQuestion(int id, [FromBody] CreateQuestionDto questionDto, CancellationToken cancellationToken)
     {
         if (questionDto is null)
         {
@@ -111,13 +147,13 @@ public class SurveysController : ControllerBase
         }
 
         var command = new AddQuestionCommand(id, questionDto);
-        await _mediator.SendAsync<AddQuestionCommand, Guid>(command, cancellationToken);
+        await _mediator.SendAsync<AddQuestionCommand, int>(command, cancellationToken);
         return CreatedAtAction(nameof(GetSurvey), new { id }, null);
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpPatch("{id:guid}/publish")]
-    public async Task<IActionResult> Publish(Guid id, [FromBody] PublishSurveyRequest request, CancellationToken cancellationToken)
+    [HttpPatch("{id:int}/publish")]
+    public async Task<IActionResult> Publish(int id, [FromBody] PublishSurveyRequest request, CancellationToken cancellationToken)
     {
         if (request is null)
         {
@@ -130,8 +166,8 @@ public class SurveysController : ControllerBase
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpGet("{id:guid}/report")]
-    public async Task<ActionResult<SurveyReportDto>> GetReport(Guid id, CancellationToken cancellationToken)
+    [HttpGet("{id:int}/report")]
+    public async Task<ActionResult<SurveyReportDto>> GetReport(int id, CancellationToken cancellationToken)
     {
         var query = new GetSurveyReportQuery(id);
         var response = await _mediator.SendAsync<GetSurveyReportQuery, SurveyReportDto?>(query, cancellationToken);
@@ -144,10 +180,10 @@ public class SurveysController : ControllerBase
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpGet("{id:guid}/report/participant")]
-    public async Task<ActionResult<ParticipantResponseDto>> GetParticipantResponse(Guid id, [FromQuery] Guid participationId, CancellationToken cancellationToken)
+    [HttpGet("{id:int}/report/participant")]
+    public async Task<ActionResult<ParticipantResponseDto>> GetParticipantResponse(int id, [FromQuery] int participationId, CancellationToken cancellationToken)
     {
-        if (participationId == Guid.Empty)
+        if (participationId == 0)
         {
             return BadRequest("Participation id is required");
         }

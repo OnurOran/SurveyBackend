@@ -4,7 +4,7 @@ using SurveyBackend.Domain.Surveys;
 
 namespace SurveyBackend.Application.Participations.Commands.StartParticipation;
 
-public sealed class StartParticipationCommandHandler : ICommandHandler<StartParticipationCommand, Guid>
+public sealed class StartParticipationCommandHandler : ICommandHandler<StartParticipationCommand, int>
 {
     private readonly ISurveyRepository _surveyRepository;
     private readonly IParticipantRepository _participantRepository;
@@ -23,9 +23,9 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
         _currentUserService = currentUserService;
     }
 
-    public async Task<Guid> HandleAsync(StartParticipationCommand request, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(StartParticipationCommand request, CancellationToken cancellationToken)
     {
-        var survey = await _surveyRepository.GetByIdAsync(request.SurveyId, cancellationToken)
+        var survey = await _surveyRepository.GetBySurveyNumberAsync(request.SurveyNumber, cancellationToken)
                      ?? throw new InvalidOperationException("Anket bulunamadı.");
 
         if (!IsAvailable(survey))
@@ -39,7 +39,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             throw new UnauthorizedAccessException("Bu anket yalnızca dahili kullanıcılar için erişilebilir. Lütfen giriş yapın.");
         }
 
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
         var isNewParticipant = false;
         Participant participant = null!;
 
@@ -54,7 +54,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             var existingParticipant = await _participantRepository.GetByLdapUsernameAsync(username, cancellationToken);
             if (existingParticipant is null)
             {
-                participant = Participant.CreateInternal(Guid.NewGuid(), username, now);
+                participant = Participant.CreateInternal(username);
                 isNewParticipant = true;
             }
             else
@@ -73,7 +73,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             var existingParticipant = await _participantRepository.GetByExternalIdAsync(externalId, cancellationToken);
             if (existingParticipant is null)
             {
-                participant = Participant.CreateAnonymous(Guid.NewGuid(), externalId, now);
+                participant = Participant.CreateAnonymous(externalId);
                 isNewParticipant = true;
             }
             else
@@ -95,7 +95,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
             return existingParticipation.Id;
         }
 
-        var participation = Participation.Start(Guid.NewGuid(), survey.Id, participant.Id, now, request.IpAddress);
+        var participation = Participation.Start(survey.Id, participant.Id, now, request.IpAddress);
 
         // Add participant if it's new (EF Core will handle this in a single transaction)
         if (isNewParticipant)
@@ -110,9 +110,9 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
 
     private static bool IsAvailable(Survey survey)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
 
-        if (!survey.IsActive)
+        if (!survey.IsPublished)
         {
             return false;
         }

@@ -1,8 +1,10 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Departments;
 
-public class Department
+public class Department : CommonEntity
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
     public string Name { get; private set; } = null!;
     public string ExternalIdentifier { get; private set; } = null!;
 
@@ -10,14 +12,13 @@ public class Department
     {
     }
 
-    private Department(Guid id, string name, string externalIdentifier)
+    private Department(string name, string externalIdentifier)
     {
-        Id = id;
         Name = name;
         ExternalIdentifier = externalIdentifier;
     }
 
-    public static Department Create(Guid id, string name, string externalIdentifier)
+    public static Department Create(string name, string externalIdentifier)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -29,6 +30,6 @@ public class Department
             throw new ArgumentException("Department external identifier cannot be empty.", nameof(externalIdentifier));
         }
 
-        return new Department(id, name.Trim(), externalIdentifier.Trim());
+        return new Department(name.Trim(), externalIdentifier.Trim());
     }
 }

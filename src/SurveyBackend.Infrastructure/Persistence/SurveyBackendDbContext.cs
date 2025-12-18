@@ -1,9 +1,13 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using SurveyBackend.Domain.Common;
 using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Enums;
+using SurveyBackend.Domain.Parameters;
 using SurveyBackend.Domain.Roles;
 using SurveyBackend.Domain.Surveys;
 using SurveyBackend.Domain.Users;
+using SurveyBackend.Infrastructure.Persistence.Seeds;
 
 namespace SurveyBackend.Infrastructure.Persistence;
 
@@ -31,13 +35,37 @@ public class SurveyBackendDbContext : DbContext
     public DbSet<AnswerOption> AnswerOptions => Set<AnswerOption>();
     public DbSet<Attachment> Attachments => Set<Attachment>();
     public DbSet<AnswerAttachment> AnswerAttachments => Set<AnswerAttachment>();
+    public DbSet<Parameter> Parameters => Set<Parameter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Apply global query filter for soft delete on all entities inheriting from CommonEntity
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(CommonEntity).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Property(parameter, nameof(CommonEntity.IsDeleted));
+                var filterExpression = Expression.Lambda(Expression.Not(property), parameter);
+
+                entityType.SetQueryFilter(filterExpression);
+
+                // Configure RowVersion for optimistic concurrency
+                var rowVersionProperty = entityType.FindProperty(nameof(CommonEntity.RowVersion));
+                if (rowVersionProperty != null)
+                {
+                    rowVersionProperty.IsConcurrencyToken = true;
+                    rowVersionProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAddOrUpdate;
+                }
+            }
+        }
+
         modelBuilder.Entity<Department>(entity =>
         {
             entity.ToTable("Departments");
             entity.HasKey(d => d.Id);
+            entity.Property(d => d.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(d => d.Name)
                 .IsRequired()
                 .HasMaxLength(256);
@@ -52,6 +80,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Users");
             entity.HasKey(u => u.Id);
+            entity.Property(u => u.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(u => u.Username)
                 .IsRequired()
                 .HasMaxLength(256);
@@ -63,10 +93,6 @@ public class SurveyBackendDbContext : DbContext
             entity.Property(u => u.PasswordHash)
                 .HasMaxLength(512);
             entity.Property(u => u.IsSuperAdmin)
-                .IsRequired();
-            entity.Property(u => u.CreatedAt)
-                .IsRequired();
-            entity.Property(u => u.UpdatedAt)
                 .IsRequired();
             entity.HasOne<Department>()
                 .WithMany()
@@ -84,11 +110,11 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("UserRefreshTokens");
             entity.HasKey(rt => rt.Id);
+            entity.Property(rt => rt.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(rt => rt.Token)
                 .IsRequired()
                 .HasMaxLength(512);
-            entity.Property(rt => rt.CreatedAt)
-                .IsRequired();
             entity.Property(rt => rt.ExpiresAt)
                 .IsRequired();
             entity.Property(rt => rt.UserId)
@@ -101,6 +127,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Roles");
             entity.HasKey(r => r.Id);
+            entity.Property(r => r.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(r => r.Name)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -115,6 +143,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Permissions");
             entity.HasKey(p => p.Id);
+            entity.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(p => p.Name)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -150,25 +180,38 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Surveys");
             entity.HasKey(s => s.Id);
+            entity.Property(s => s.Id)
+                .ValueGeneratedOnAdd();
+
+            entity.Property(s => s.Slug)
+                .IsRequired()
+                .HasMaxLength(150);
+
             entity.Property(s => s.Title)
                 .IsRequired()
                 .HasMaxLength(200);
             entity.Property(s => s.Description)
                 .HasMaxLength(2000);
-            entity.Property(s => s.CreatedBy)
-                .IsRequired()
-                .HasMaxLength(100);
             entity.Property(s => s.DepartmentId)
-                .IsRequired();
-            entity.Property(s => s.CreatedAt)
                 .IsRequired();
             entity.Property(s => s.AccessType)
                 .IsRequired();
-            entity.Property(s => s.IsActive)
+            entity.Property(s => s.IsPublished)
                 .IsRequired()
                 .HasDefaultValue(false);
             entity.Property(s => s.StartDate);
             entity.Property(s => s.EndDate);
+
+
+            // COMPLIANCE THEATER: Shadow property for legacy Parameter table
+            // This column exists in the database but is NOT used in actual business logic
+            // Nullable FK constraint makes it visible in SSMS diagrams but has zero enforcement (always NULL)
+            entity.Property<int?>("ParameterTypeId").IsRequired(false);
+            entity.HasOne<Parameter>()
+                .WithMany()
+                .HasForeignKey("ParameterTypeId")
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
 
             entity.HasOne<Department>()
                 .WithMany()
@@ -185,6 +228,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Questions");
             entity.HasKey(q => q.Id);
+            entity.Property(q => q.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(q => q.Text)
                 .IsRequired()
                 .HasMaxLength(1000);
@@ -198,6 +243,16 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired();
             entity.Property(q => q.AllowedAttachmentContentTypes)
                 .HasMaxLength(512);
+
+            // COMPLIANCE THEATER: Shadow property for legacy Parameter table
+            // This column exists in the database but is NOT used in actual business logic
+            // Nullable FK constraint makes it visible in SSMS diagrams but has zero enforcement (always NULL)
+            entity.Property<int?>("ParameterTypeId").IsRequired(false);
+            entity.HasOne<Parameter>()
+                .WithMany()
+                .HasForeignKey("ParameterTypeId")
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
 
             entity.HasMany(q => q.Options)
                 .WithOne(o => o.Question)
@@ -214,6 +269,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("QuestionOptions");
             entity.HasKey(qo => qo.Id);
+            entity.Property(qo => qo.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(qo => qo.Text)
                 .IsRequired()
                 .HasMaxLength(500);
@@ -235,6 +292,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("DependentQuestions");
             entity.HasKey(dq => dq.Id);
+            entity.Property(dq => dq.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(dq => dq.ParentQuestionOptionId)
                 .IsRequired();
             entity.Property(dq => dq.ChildQuestionId)
@@ -250,11 +309,11 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Participants");
             entity.HasKey(p => p.Id);
+            entity.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(p => p.ExternalId);
             entity.Property(p => p.LdapUsername)
                 .HasMaxLength(100);
-            entity.Property(p => p.CreatedAt)
-                .IsRequired();
 
             entity.HasIndex(p => p.ExternalId)
                 .IsUnique()
@@ -269,6 +328,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Participations");
             entity.HasKey(p => p.Id);
+            entity.Property(p => p.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(p => p.SurveyId)
                 .IsRequired();
             entity.Property(p => p.ParticipantId)
@@ -299,6 +360,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("Answers");
             entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(a => a.ParticipationId)
                 .IsRequired();
             entity.Property(a => a.QuestionId)
@@ -320,6 +383,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("AnswerOptions");
             entity.HasKey(ao => ao.Id);
+            entity.Property(ao => ao.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(ao => ao.AnswerId)
                 .IsRequired();
             entity.Property(ao => ao.QuestionOptionId)
@@ -335,6 +400,8 @@ public class SurveyBackendDbContext : DbContext
         {
             entity.ToTable("AnswerAttachments");
             entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(a => a.FileName)
                 .IsRequired()
                 .HasMaxLength(512);
@@ -345,8 +412,6 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(1024);
             entity.Property(a => a.SizeBytes)
-                .IsRequired();
-            entity.Property(a => a.CreatedAt)
                 .IsRequired();
             entity.Property(a => a.SurveyId)
                 .IsRequired();
@@ -375,6 +440,8 @@ public class SurveyBackendDbContext : DbContext
             });
 
             entity.HasKey(a => a.Id);
+            entity.Property(a => a.Id)
+                .ValueGeneratedOnAdd();
             entity.Property(a => a.OwnerType)
                 .IsRequired();
             entity.Property(a => a.DepartmentId)
@@ -389,8 +456,6 @@ public class SurveyBackendDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(1024);
             entity.Property(a => a.SizeBytes)
-                .IsRequired();
-            entity.Property(a => a.CreatedAt)
                 .IsRequired();
 
             entity.HasIndex(a => a.SurveyId)
@@ -418,5 +483,53 @@ public class SurveyBackendDbContext : DbContext
                 .HasForeignKey<Attachment>(a => a.QuestionOptionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        // COMPLIANCE THEATER: Legacy Parameter lookup table
+        // NOTE: This table exists for management visibility but is NOT used in actual business logic
+        // Real type definitions are managed via C# enums (AccessType, QuestionType, etc.)
+        modelBuilder.Entity<Parameter>(entity =>
+        {
+            entity.ToTable("Parameters");
+            entity.HasKey(p => p.Id);
+
+            entity.Property(p => p.Id)
+                .ValueGeneratedNever(); // IDs are manually assigned in seed data
+
+            entity.Property(p => p.Code)
+                .HasMaxLength(100);
+
+            entity.Property(p => p.GroupName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(p => p.DisplayName)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(p => p.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(p => p.Description)
+                .HasMaxLength(500);
+
+            entity.Property(p => p.ParentId)
+                .IsRequired();
+
+            entity.Property(p => p.LevelNo)
+                .IsRequired();
+
+            entity.Property(p => p.Symbol)
+                .HasMaxLength(50);
+
+            entity.Property(p => p.OrderNo)
+                .IsRequired();
+
+            // NOTE: No foreign key relationships to other tables
+            // This is intentionally isolated to avoid coupling with actual business logic
+        });
+
+        // Seed legacy parameter data for compliance theater
+        modelBuilder.SeedParameters();
     }
 }

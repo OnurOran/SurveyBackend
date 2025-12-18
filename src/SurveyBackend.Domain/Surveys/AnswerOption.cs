@@ -1,10 +1,12 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Surveys;
 
-public class AnswerOption
+public class AnswerOption : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid AnswerId { get; private set; }
-    public Guid QuestionOptionId { get; private set; }
+    public int Id { get; private set; }
+    public int AnswerId { get; private set; }
+    public int QuestionOptionId { get; private set; }
 
     public Answer Answer { get; private set; } = null!;
     public QuestionOption QuestionOption { get; private set; } = null!;
@@ -13,9 +15,8 @@ public class AnswerOption
     {
     }
 
-    public AnswerOption(Guid id, Guid answerId, Guid questionOptionId)
+    public AnswerOption(int answerId, int questionOptionId)
     {
-        Id = id;
         AnswerId = answerId;
         QuestionOptionId = questionOptionId;
     }

@@ -5,7 +5,7 @@ using SurveyBackend.Domain.Roles;
 
 namespace SurveyBackend.Application.Modules.Authorization.Handlers;
 
-public sealed class CreateRoleCommandHandler : ICommandHandler<CreateRoleCommand, Guid>
+public sealed class CreateRoleCommandHandler : ICommandHandler<CreateRoleCommand, int>
 {
     private readonly IAuthorizationService _authorizationService;
     private readonly IRoleRepository _roleRepository;
@@ -21,7 +21,7 @@ public sealed class CreateRoleCommandHandler : ICommandHandler<CreateRoleCommand
         _permissionRepository = permissionRepository;
     }
 
-    public async Task<Guid> HandleAsync(CreateRoleCommand request, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(CreateRoleCommand request, CancellationToken cancellationToken)
     {
         await _authorizationService.EnsurePermissionAsync("ManageUsers", cancellationToken);
 
@@ -40,7 +40,7 @@ public sealed class CreateRoleCommandHandler : ICommandHandler<CreateRoleCommand
             throw new InvalidOperationException("En az bir geçerli permission seçilmelidir.");
         }
 
-        var role = new Role(Guid.NewGuid(), request.Name, request.Description);
+        var role = Role.Create(request.Name, request.Description);
         foreach (var permission in selectedPermissions)
         {
             role.Permissions.Add(new RolePermission(role.Id, permission.Id));

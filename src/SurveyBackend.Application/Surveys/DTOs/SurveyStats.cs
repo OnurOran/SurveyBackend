@@ -1,11 +1,11 @@
 namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record SurveyStats(
-    Guid SurveyId,
+    int SurveyId,
     string Title,
-    Guid DepartmentId,
+    int DepartmentId,
     bool IsActive,
-    DateTimeOffset CreatedAt,
-    DateTimeOffset? StartDate,
-    DateTimeOffset? EndDate,
+    DateTime CreatedAt,
+    DateTime? StartDate,
+    DateTime? EndDate,
     int ParticipationCount);

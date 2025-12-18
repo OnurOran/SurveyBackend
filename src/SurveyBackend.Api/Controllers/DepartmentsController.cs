@@ -28,8 +28,8 @@ public class DepartmentsController : ControllerBase
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]
-    [HttpGet("{departmentId:guid}/users")]
-    public async Task<ActionResult<IReadOnlyCollection<DepartmentUserDto>>> GetUsers(Guid departmentId, CancellationToken cancellationToken)
+    [HttpGet("{departmentId:int}/users")]
+    public async Task<ActionResult<IReadOnlyCollection<DepartmentUserDto>>> GetUsers(int departmentId, CancellationToken cancellationToken)
     {
         var query = new GetDepartmentUsersQuery(departmentId);
         var response = await _mediator.SendAsync<GetDepartmentUsersQuery, IReadOnlyCollection<DepartmentUserDto>>(query, cancellationToken);

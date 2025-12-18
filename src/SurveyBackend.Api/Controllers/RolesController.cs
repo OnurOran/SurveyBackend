@@ -46,7 +46,7 @@ public class RolesController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var roleId = await _mediator.SendAsync<CreateRoleCommand, Guid>(command, cancellationToken);
+        var roleId = await _mediator.SendAsync<CreateRoleCommand, int>(command, cancellationToken);
         return CreatedAtAction(nameof(GetAll), new { id = roleId }, null);
     }
 }

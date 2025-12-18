@@ -1,8 +1,10 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Roles;
 
-public class Role
+public class Role : CommonEntity
 {
-    public Guid Id { get; private set; }
+    public int Id { get; private set; }
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
 
@@ -12,11 +14,20 @@ public class Role
     {
     }
 
-    public Role(Guid id, string name, string description)
+    public Role(int id, string name, string description)
     {
         Id = id;
         Name = name;
         Description = description;
+    }
+
+    public static Role Create(string name, string description)
+    {
+        return new Role
+        {
+            Name = name,
+            Description = description
+        };
     }
 
     public void UpdateDetails(string name, string description)

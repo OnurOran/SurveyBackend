@@ -1,10 +1,12 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Surveys;
 
-public class DependentQuestion
+public class DependentQuestion : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid ParentQuestionOptionId { get; private set; }
-    public Guid ChildQuestionId { get; private set; }
+    public int Id { get; private set; }
+    public int ParentQuestionOptionId { get; private set; }
+    public int ChildQuestionId { get; private set; }
 
     public QuestionOption ParentOption { get; private set; } = null!;
     public Question ChildQuestion { get; private set; } = null!;
@@ -13,9 +15,8 @@ public class DependentQuestion
     {
     }
 
-    public DependentQuestion(Guid id, Guid parentQuestionOptionId, Guid childQuestionId)
+    public DependentQuestion(int parentQuestionOptionId, int childQuestionId)
     {
-        Id = id;
         ParentQuestionOptionId = parentQuestionOptionId;
         ChildQuestionId = childQuestionId;
     }

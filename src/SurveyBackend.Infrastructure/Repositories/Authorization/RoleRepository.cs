@@ -33,7 +33,7 @@ public sealed class RoleRepository : IRoleRepository
             .FirstOrDefaultAsync(r => r.Name == name, cancellationToken);
     }
 
-    public async Task<Role?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Role?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Roles
             .Include(r => r.Permissions)

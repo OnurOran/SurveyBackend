@@ -7,7 +7,7 @@ using SurveyBackend.Domain.Enums;
 
 namespace SurveyBackend.Application.Surveys.Commands.AddQuestion;
 
-public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionCommand, Guid>
+public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionCommand, int>
 {
     private readonly ISurveyRepository _surveyRepository;
     private readonly IAuthorizationService _authorizationService;
@@ -38,7 +38,7 @@ public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionComma
         _attachmentService = attachmentService;
     }
 
-    public async Task<Guid> HandleAsync(AddQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(AddQuestionCommand request, CancellationToken cancellationToken)
     {
         var survey = await _surveyRepository.GetByIdAsync(request.SurveyId, cancellationToken)
                      ?? throw new InvalidOperationException("Anket bulunamadı.");
@@ -55,7 +55,7 @@ public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionComma
             throw new InvalidOperationException("Dosya tipi kısıtı sadece dosya yükleme soruları için geçerlidir.");
         }
 
-        var question = survey.AddQuestion(Guid.NewGuid(), questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
+        var question = survey.AddQuestion(questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
         if (questionDto.Type == QuestionType.FileUpload)
         {
             var normalizedAllowed = NormalizeAllowedContentTypes(questionDto.AllowedAttachmentContentTypes);
@@ -67,7 +67,7 @@ public sealed class AddQuestionCommandHandler : ICommandHandler<AddQuestionComma
         {
             foreach (var option in questionDto.Options)
             {
-                var createdOption = question.AddOption(Guid.NewGuid(), option.Text, option.Order, option.Value);
+                var createdOption = question.AddOption(option.Text, option.Order, option.Value);
                 if (option.Attachment is not null)
                 {
                     optionAttachmentQueue.Add((createdOption, option.Attachment));

@@ -44,7 +44,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
 
     public async Task<AuthTokensDto> HandleAsync(LoginCommand request, CancellationToken cancellationToken)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
         var localUser = await _userRepository.GetLocalByUsernameAsync(request.Username, cancellationToken);
         User user;
         Func<CancellationToken, Task>? persistUserOperation = null;
@@ -73,7 +73,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
             var department = await _departmentRepository.GetByExternalIdentifierAsync(externalIdentifier, cancellationToken);
             if (department is null)
             {
-                department = Department.Create(Guid.NewGuid(), departmentName, externalIdentifier);
+                department = Department.Create(departmentName, externalIdentifier);
                 await _departmentRepository.AddAsync(department, cancellationToken);
             }
 
@@ -81,7 +81,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
 
             if (existingUser is null)
             {
-                user = User.Create(ldapUser.ExternalId == Guid.Empty ? Guid.NewGuid() : ldapUser.ExternalId, ldapUser.Username, ldapUser.Email, department.Id, now);
+                user = User.Create(ldapUser.Username, ldapUser.Email, department.Id);
                 persistUserOperation = ct => _userRepository.AddAsync(user, ct);
             }
             else
@@ -91,7 +91,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
                     shouldClearRoles = true;
                 }
 
-                existingUser.UpdateContactInformation(ldapUser.Email, department.Id, now);
+                existingUser.UpdateContactInformation(ldapUser.Email, department.Id);
                 user = existingUser;
                 persistUserOperation = ct => _userRepository.UpdateAsync(user, ct);
             }
@@ -104,7 +104,7 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
 
         var permissions = await ResolvePermissionsAsync(user, cancellationToken);
         var tokenResult = await _jwtTokenService.GenerateTokensAsync(user, permissions, cancellationToken);
-        var refreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt, now);
+        var refreshToken = user.IssueRefreshToken(tokenResult.RefreshToken, tokenResult.RefreshTokenExpiresAt);
 
         // Persist user and refresh token (EF Core handles cascade insert automatically)
         if (persistUserOperation is not null)

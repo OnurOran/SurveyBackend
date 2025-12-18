@@ -2,4 +2,4 @@ using SurveyBackend.Application.Surveys.DTOs;
 
 namespace SurveyBackend.Application.Surveys.Queries.GetAttachment;
 
-public sealed record GetAttachmentQuery(Guid AttachmentId) : ICommand<AttachmentDownloadResult>;
+public sealed record GetAttachmentQuery(int AttachmentId) : ICommand<AttachmentDownloadResult>;

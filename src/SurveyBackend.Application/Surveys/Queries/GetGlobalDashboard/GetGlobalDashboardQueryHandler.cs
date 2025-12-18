@@ -15,7 +15,7 @@ public sealed class GetGlobalDashboardQueryHandler : ICommandHandler<GetGlobalDa
     public async Task<GlobalDashboardDto> HandleAsync(GetGlobalDashboardQuery request, CancellationToken cancellationToken)
     {
         var surveyStats = await _surveyRepository.GetSurveyStatsAsync(cancellationToken);
-        var now = DateTimeOffset.UtcNow;
+        var now = DateTime.Now;
 
         var totalSurveys = surveyStats.Count;
         var activeSurveys = surveyStats.Count(s =>

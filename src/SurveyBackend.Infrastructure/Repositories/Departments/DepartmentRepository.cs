@@ -21,7 +21,7 @@ public sealed class DepartmentRepository : IDepartmentRepository
             .FirstOrDefaultAsync(d => d.ExternalIdentifier == externalIdentifier, cancellationToken);
     }
 
-    public async Task<Department?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Department?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Departments
             .AsNoTracking()

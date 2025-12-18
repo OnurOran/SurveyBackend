@@ -24,19 +24,44 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Departments.Department", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExternalIdentifier")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -46,21 +71,263 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.ToTable("Departments", (string)null);
                 });
 
+            modelBuilder.Entity("SurveyBackend.Domain.Parameters.Parameter", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LevelNo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("OrderNo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Symbol")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Parameters", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DisplayName = "Parameters",
+                            GroupName = "Parameters",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 0,
+                            Name = "Parameters",
+                            OrderNo = 0,
+                            ParentId = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Anket erişim tipi parametreleri",
+                            DisplayName = "Anket Erişim Türleri",
+                            GroupName = "SurveyAccessTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 1,
+                            Name = "SurveyAccessTypes",
+                            OrderNo = 0,
+                            ParentId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Code = "INTERNAL",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Sadece kurum içi erişim",
+                            DisplayName = "Dahili",
+                            GroupName = "SurveyAccessTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "Internal",
+                            OrderNo = 0,
+                            ParentId = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Code = "PUBLIC",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Herkese açık erişim",
+                            DisplayName = "Halka Açık",
+                            GroupName = "SurveyAccessTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "Public",
+                            OrderNo = 1,
+                            ParentId = 2
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Anket soru tipi parametreleri",
+                            DisplayName = "Soru Türleri",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 1,
+                            Name = "QuestionTypes",
+                            OrderNo = 1,
+                            ParentId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Code = "SINGLE_SELECT",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Tek seçenek seçilebilen soru tipi",
+                            DisplayName = "Tekli Seçim",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "SingleSelect",
+                            OrderNo = 0,
+                            ParentId = 5
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Code = "MULTI_SELECT",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Birden fazla seçenek seçilebilen soru tipi",
+                            DisplayName = "Çoklu Seçim",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "MultiSelect",
+                            OrderNo = 1,
+                            ParentId = 5
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Code = "OPEN_TEXT",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Serbest metin girişi yapılabilen soru tipi",
+                            DisplayName = "Açık Metin",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "OpenText",
+                            OrderNo = 2,
+                            ParentId = 5
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Code = "FILE_UPLOAD",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Dosya yüklemesi yapılabilen soru tipi",
+                            DisplayName = "Dosya Yükleme",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "FileUpload",
+                            OrderNo = 3,
+                            ParentId = 5
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Code = "CONDITIONAL",
+                            CreateDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Koşula bağlı olarak gösterilen soru tipi",
+                            DisplayName = "Koşullu",
+                            GroupName = "QuestionTypes",
+                            IsActive = true,
+                            IsDeleted = false,
+                            LevelNo = 2,
+                            Name = "Conditional",
+                            OrderNo = 4,
+                            ParentId = 5
+                        });
+                });
+
             modelBuilder.Entity("SurveyBackend.Domain.Roles.Permission", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -69,19 +336,44 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Roles.Role", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -90,11 +382,34 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Roles.RolePermission", b =>
                 {
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -105,17 +420,42 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Answer", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("ParticipationId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ParticipationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("TextValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -129,28 +469,44 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerAttachment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("AnswerId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint");
@@ -160,8 +516,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
-                    b.Property<Guid>("SurveyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("SurveyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -173,15 +535,40 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.AnswerOption", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("AnswerId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("QuestionOptionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("AnswerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("QuestionOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -194,34 +581,50 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Attachment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("OwnerType")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("QuestionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("QuestionId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid?>("QuestionOptionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("QuestionOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<long>("SizeBytes")
                         .HasColumnType("bigint");
@@ -231,8 +634,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
-                    b.Property<Guid?>("SurveyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("SurveyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -256,15 +665,40 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.DependentQuestion", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("ChildQuestionId")
-                        .HasColumnType("uniqueidentifier");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("ParentQuestionOptionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("ChildQuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ParentQuestionOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -277,19 +711,41 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Participant", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ExternalId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LdapUsername")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -306,25 +762,50 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Participation", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CompletedAt")
-                        .HasColumnType("datetimeoffset");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<Guid>("ParticipantId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                    b.Property<DateTimeOffset>("StartedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
-                    b.Property<Guid>("SurveyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("ParticipantId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SurveyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -337,17 +818,31 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Question", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AllowedAttachmentContentTypes")
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsRequired")
                         .HasColumnType("bit");
@@ -355,8 +850,16 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SurveyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("ParameterTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SurveyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -366,7 +869,15 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ParameterTypeId");
 
                     b.HasIndex("SurveyId");
 
@@ -375,20 +886,45 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.QuestionOption", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Value")
                         .HasColumnType("int");
@@ -402,9 +938,11 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Survey", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccessType")
                         .HasColumnType("int");
@@ -412,28 +950,32 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<string>("ConsentText")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<DateTimeOffset?>("EndDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("IntroText")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublished")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
@@ -441,43 +983,86 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<string>("OutroText")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTimeOffset?>("StartDate")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<int?>("ParameterTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
+
+                    b.HasIndex("ParameterTypeId");
 
                     b.ToTable("Surveys", (string)null);
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Users.RefreshToken", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
 
-                    b.Property<DateTimeOffset?>("RevokedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Token")
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -491,20 +1076,31 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Users.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsSuperAdmin")
                         .HasColumnType("bit");
@@ -513,8 +1109,16 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -530,14 +1134,37 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Users.UserRole", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
-                    b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdateEmployeeId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "RoleId", "DepartmentId");
 
@@ -678,6 +1305,11 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Question", b =>
                 {
+                    b.HasOne("SurveyBackend.Domain.Parameters.Parameter", null)
+                        .WithMany()
+                        .HasForeignKey("ParameterTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SurveyBackend.Domain.Surveys.Survey", "Survey")
                         .WithMany("Questions")
                         .HasForeignKey("SurveyId")
@@ -705,6 +1337,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("SurveyBackend.Domain.Parameters.Parameter", null)
+                        .WithMany()
+                        .HasForeignKey("ParameterTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("SurveyBackend.Domain.Users.RefreshToken", b =>

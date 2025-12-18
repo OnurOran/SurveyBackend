@@ -1,13 +1,14 @@
+using SurveyBackend.Domain.Common;
 using SurveyBackend.Domain.Departments;
 using SurveyBackend.Domain.Roles;
 
 namespace SurveyBackend.Domain.Users;
 
-public class UserRole
+public class UserRole : CommonEntity
 {
-    public Guid UserId { get; private set; }
-    public Guid RoleId { get; private set; }
-    public Guid DepartmentId { get; private set; }
+    public int UserId { get; private set; }
+    public int RoleId { get; private set; }
+    public int DepartmentId { get; private set; }
 
     public User User { get; private set; } = null!;
     public Role Role { get; private set; } = null!;
@@ -17,7 +18,7 @@ public class UserRole
     {
     }
 
-    public UserRole(Guid userId, Guid roleId, Guid departmentId)
+    public UserRole(int userId, int roleId, int departmentId)
     {
         UserId = userId;
         RoleId = roleId;

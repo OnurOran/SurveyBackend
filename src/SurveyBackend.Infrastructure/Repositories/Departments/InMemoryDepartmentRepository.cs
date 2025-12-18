@@ -13,9 +13,9 @@ public sealed class InMemoryDepartmentRepository : IDepartmentRepository
     static InMemoryDepartmentRepository()
     {
         // Seed some initial departments
-        _departments.TryAdd("hr", Department.Create(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Human Resources", "hr"));
-        _departments.TryAdd("engineering", Department.Create(Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), "Engineering", "engineering"));
-        _departments.TryAdd("sales", Department.Create(Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"), "Sales", "sales"));
+        _departments.TryAdd("hr", Department.Create("Human Resources", "hr"));
+        _departments.TryAdd("engineering", Department.Create("Engineering", "engineering"));
+        _departments.TryAdd("sales", Department.Create("Sales", "sales"));
     }
 
     public Task<Department?> GetByExternalIdentifierAsync(string externalIdentifier, CancellationToken cancellationToken)
@@ -24,7 +24,7 @@ public sealed class InMemoryDepartmentRepository : IDepartmentRepository
         return Task.FromResult(department);
     }
 
-    public Task<Department?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public Task<Department?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         var department = _departments.Values.FirstOrDefault(d => d.Id == id);
         return Task.FromResult(department);

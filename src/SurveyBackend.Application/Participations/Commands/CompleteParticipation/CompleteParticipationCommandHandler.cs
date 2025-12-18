@@ -27,7 +27,7 @@ public sealed class CompleteParticipationCommandHandler : ICommandHandler<Comple
         // Validate required questions
         ValidateRequiredQuestions(survey, participation);
 
-        participation.Complete(DateTimeOffset.UtcNow);
+        participation.Complete(DateTime.Now);
 
         await _participationRepository.UpdateAsync(participation, cancellationToken);
         return true;

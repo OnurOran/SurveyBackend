@@ -28,14 +28,14 @@ public sealed class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Username == username && u.IsSuperAdmin, cancellationToken);
     }
 
-    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Users
             .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<User>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<User>> GetByDepartmentAsync(int departmentId, CancellationToken cancellationToken)
     {
         return await _dbContext.Users
             .Include(u => u.Roles)

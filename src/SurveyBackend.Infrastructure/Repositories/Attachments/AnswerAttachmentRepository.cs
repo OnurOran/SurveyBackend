@@ -15,7 +15,7 @@ public sealed class AnswerAttachmentRepository : IAnswerAttachmentRepository
         _dbContext = dbContext;
     }
 
-    public async Task<AnswerAttachment?> GetByAnswerIdAsync(Guid answerId, CancellationToken cancellationToken)
+    public async Task<AnswerAttachment?> GetByAnswerIdAsync(int answerId, CancellationToken cancellationToken)
     {
         return await _dbContext.AnswerAttachments.FirstOrDefaultAsync(a => a.AnswerId == answerId, cancellationToken);
     }
@@ -32,7 +32,7 @@ public sealed class AnswerAttachmentRepository : IAnswerAttachmentRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<AnswerAttachmentAccessInfo?> GetAccessInfoAsync(Guid attachmentId, CancellationToken cancellationToken)
+    public async Task<AnswerAttachmentAccessInfo?> GetAccessInfoAsync(int attachmentId, CancellationToken cancellationToken)
     {
         return await (
             from a in _dbContext.AnswerAttachments

@@ -1,9 +1,11 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Roles;
 
-public class RolePermission
+public class RolePermission : CommonEntity
 {
-    public Guid RoleId { get; private set; }
-    public Guid PermissionId { get; private set; }
+    public int RoleId { get; private set; }
+    public int PermissionId { get; private set; }
 
     public Role Role { get; private set; } = null!;
     public Permission Permission { get; private set; } = null!;
@@ -12,7 +14,7 @@ public class RolePermission
     {
     }
 
-    public RolePermission(Guid roleId, Guid permissionId)
+    public RolePermission(int roleId, int permissionId)
     {
         RoleId = roleId;
         PermissionId = permissionId;

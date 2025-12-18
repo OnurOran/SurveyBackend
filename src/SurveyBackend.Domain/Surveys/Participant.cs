@@ -1,41 +1,40 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Surveys;
 
-public class Participant
+public class Participant : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid? ExternalId { get; private set; }
+    public int Id { get; private set; }
+    public Guid? ExternalId { get; private set; }  // Keep as Guid for external system compatibility
     public string? LdapUsername { get; private set; }
-    public DateTimeOffset CreatedAt { get; private set; }
 
     private Participant()
     {
     }
 
-    private Participant(Guid id, Guid? externalId, string? ldapUsername, DateTimeOffset createdAt)
+    private Participant(Guid? externalId, string? ldapUsername)
     {
-        Id = id;
         ExternalId = externalId;
         LdapUsername = ldapUsername;
-        CreatedAt = createdAt;
     }
 
-    public static Participant Create(Guid id, DateTimeOffset createdAt, Guid? externalId = null, string? ldapUsername = null)
+    public static Participant Create(Guid? externalId = null, string? ldapUsername = null)
     {
         if (externalId is null && string.IsNullOrWhiteSpace(ldapUsername))
         {
             throw new ArgumentException("Participant must have either an external id or an LDAP username.");
         }
 
-        return new Participant(id, externalId, ldapUsername?.Trim(), createdAt);
+        return new Participant(externalId, ldapUsername?.Trim());
     }
 
-    public static Participant CreateAnonymous(Guid id, Guid externalId, DateTimeOffset createdAt)
+    public static Participant CreateAnonymous(Guid externalId)
     {
-        return Create(id, createdAt, externalId, null);
+        return Create(externalId, null);
     }
 
-    public static Participant CreateInternal(Guid id, string ldapUsername, DateTimeOffset createdAt)
+    public static Participant CreateInternal(string ldapUsername)
     {
-        return Create(id, createdAt, null, ldapUsername);
+        return Create(null, ldapUsername);
     }
 }

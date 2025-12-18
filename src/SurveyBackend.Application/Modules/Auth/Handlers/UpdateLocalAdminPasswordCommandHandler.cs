@@ -35,7 +35,7 @@ namespace SurveyBackend.Application.Modules.Auth.Handlers;
         }
 
         var hash = _passwordHasher.Hash(request.NewPassword);
-        adminUser.UpdateSuperAdminPassword(hash, DateTimeOffset.UtcNow);
+        adminUser.UpdateSuperAdminPassword(hash);
         await _userRepository.UpdateAsync(adminUser, cancellationToken);
         return true;
     }

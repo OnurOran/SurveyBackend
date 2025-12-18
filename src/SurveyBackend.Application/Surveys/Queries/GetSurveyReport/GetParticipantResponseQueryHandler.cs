@@ -70,8 +70,8 @@ public sealed class GetParticipantResponseQueryHandler : ICommandHandler<GetPart
             ParticipationId = participation.Id,
             ParticipantName = participation.Participant?.LdapUsername,
             IsCompleted = participation.CompletedAt.HasValue,
-            StartedAt = participation.StartedAt.UtcDateTime,
-            CompletedAt = participation.CompletedAt?.UtcDateTime,
+            StartedAt = participation.StartedAt,
+            CompletedAt = participation.CompletedAt,
             Answers = answers
         };
     }

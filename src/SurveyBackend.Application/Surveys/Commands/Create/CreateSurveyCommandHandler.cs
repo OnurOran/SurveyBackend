@@ -6,7 +6,7 @@ using SurveyBackend.Domain.Surveys;
 
 namespace SurveyBackend.Application.Surveys.Commands.Create;
 
-public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCommand, Guid>
+public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCommand, int>
 {
     private readonly ISurveyRepository _surveyRepository;
     private readonly ICurrentUserService _currentUserService;
@@ -40,24 +40,19 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
         _attachmentService = attachmentService;
     }
 
-    public async Task<Guid> HandleAsync(CreateSurveyCommand request, CancellationToken cancellationToken)
+    public async Task<int> HandleAsync(CreateSurveyCommand request, CancellationToken cancellationToken)
     {
         if (!_currentUserService.IsAuthenticated || !_currentUserService.UserId.HasValue)
         {
             throw new UnauthorizedAccessException("Kullanıcı doğrulanamadı.");
         }
 
-        // Prefer username for display; fall back to user id if missing
-        var creator = !string.IsNullOrWhiteSpace(_currentUserService.Username)
-            ? _currentUserService.Username!
-            : _currentUserService.UserId.Value.ToString();
-        var now = DateTimeOffset.UtcNow;
         var departmentId = _currentUserService.DepartmentId
             ?? throw new UnauthorizedAccessException("Kullanıcının departman bilgisi bulunamadı.");
 
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
-        var survey = Survey.Create(Guid.NewGuid(), request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, creator, departmentId, request.AccessType, now);
+        var survey = Survey.Create(request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, departmentId, request.AccessType);
 
         var questionAttachmentQueue = new List<(Question Question, AttachmentUploadDto Attachment)>();
         var optionAttachmentQueue = new List<(QuestionOption Option, AttachmentUploadDto Attachment)>();
@@ -103,7 +98,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                     }
                 }
 
-                var question = survey.AddQuestion(Guid.NewGuid(), questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
+                var question = survey.AddQuestion(questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
                 if (questionDto.Type == Domain.Enums.QuestionType.FileUpload)
                 {
                     var normalizedAllowed = NormalizeAllowedContentTypes(questionDto.AllowedAttachmentContentTypes);
@@ -120,7 +115,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 
                 foreach (var optionDto in questionDto.Options)
                 {
-                    var option = question.AddOption(Guid.NewGuid(), optionDto.Text, optionDto.Order, optionDto.Value);
+                    var option = question.AddOption(optionDto.Text, optionDto.Order, optionDto.Value);
                     if (optionDto.Attachment is not null)
                     {
                         optionAttachmentQueue.Add((option, optionDto.Attachment));
@@ -140,7 +135,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                         }
 
                         // Create child question
-                        var childQuestion = survey.AddQuestion(Guid.NewGuid(), childDto.Text, childDto.Type, childDto.Order, childDto.IsRequired);
+                        var childQuestion = survey.AddQuestion(childDto.Text, childDto.Type, childDto.Order, childDto.IsRequired);
                         if (childDto.Type == Domain.Enums.QuestionType.FileUpload)
                         {
                             var normalizedAllowed = NormalizeAllowedContentTypes(childDto.AllowedAttachmentContentTypes);
@@ -156,7 +151,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                         {
                             foreach (var childOptionDto in childDto.Options)
                             {
-                                var childOption = childQuestion.AddOption(Guid.NewGuid(), childOptionDto.Text, childOptionDto.Order, childOptionDto.Value);
+                                var childOption = childQuestion.AddOption(childOptionDto.Text, childOptionDto.Order, childOptionDto.Value);
                                 if (childOptionDto.Attachment is not null)
                                 {
                                     optionAttachmentQueue.Add((childOption, childOptionDto.Attachment));
@@ -165,7 +160,7 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
                         }
 
                         // Create dependent question mapping
-                        parentOption.AddDependentQuestion(Guid.NewGuid(), childQuestion.Id);
+                        parentOption.AddDependentQuestion(childQuestion.Id);
                     }
                 }
             }

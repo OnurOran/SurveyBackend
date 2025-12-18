@@ -51,7 +51,6 @@ public sealed class SubmitAnswerCommandHandler : ICommandHandler<SubmitAnswerCom
 
         // Modify the tracked entity - EF Core will detect these changes
         var answer = participation.AddOrUpdateAnswer(
-            Guid.NewGuid(),
             request.QuestionId,
             question.Type == QuestionType.FileUpload ? null : request.TextValue,
             question.Type == QuestionType.FileUpload ? null : request.OptionIds);

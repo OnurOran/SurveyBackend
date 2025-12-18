@@ -1,8 +1,8 @@
 namespace SurveyBackend.Application.Surveys.DTOs;
 
 public sealed record SurveyDashboardItemDto(
-    Guid SurveyId,
+    int SurveyId,
     string Title,
     bool IsActive,
-    DateTimeOffset CreatedAt,
+    DateTime CreatedAt,
     int ParticipationCount);

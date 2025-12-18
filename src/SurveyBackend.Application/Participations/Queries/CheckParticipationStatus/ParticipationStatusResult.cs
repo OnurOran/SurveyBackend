@@ -3,4 +3,4 @@ namespace SurveyBackend.Application.Participations.Queries.CheckParticipationSta
 public sealed record ParticipationStatusResult(
     bool HasParticipated,
     bool IsCompleted,
-    DateTimeOffset? CompletedAt);
+    DateTime? CompletedAt);

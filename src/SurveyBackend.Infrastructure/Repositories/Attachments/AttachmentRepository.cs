@@ -16,7 +16,7 @@ public sealed class AttachmentRepository : IAttachmentRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Attachment?> GetByOwnerAsync(AttachmentOwnerType ownerType, Guid ownerId, CancellationToken cancellationToken)
+    public async Task<Attachment?> GetByOwnerAsync(AttachmentOwnerType ownerType, int ownerId, CancellationToken cancellationToken)
     {
         return ownerType switch
         {
@@ -27,7 +27,7 @@ public sealed class AttachmentRepository : IAttachmentRepository
         };
     }
 
-    public async Task<Attachment?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Attachment?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _dbContext.Attachments
             .AsNoTracking()
@@ -49,7 +49,7 @@ public sealed class AttachmentRepository : IAttachmentRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<AttachmentAccessInfo?> GetAccessInfoAsync(Guid attachmentId, CancellationToken cancellationToken)
+    public async Task<AttachmentAccessInfo?> GetAccessInfoAsync(int attachmentId, CancellationToken cancellationToken)
     {
         var surveyAttachment = await (
             from a in _dbContext.Attachments

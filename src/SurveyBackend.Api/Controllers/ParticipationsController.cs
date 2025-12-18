@@ -23,9 +23,15 @@ public class ParticipationsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("status/{surveyId:guid}")]
-    public async Task<ActionResult<ParticipationStatusResult>> CheckStatus(Guid surveyId, CancellationToken cancellationToken)
+    [HttpGet("status/{slug}")]
+    public async Task<ActionResult<ParticipationStatusResult>> CheckStatus(string slug, CancellationToken cancellationToken)
     {
+        var surveyNumber = ParseSurveyNumberFromSlug(slug);
+        if (surveyNumber == 0)
+        {
+            return BadRequest("Geçersiz anket URL formatı.");
+        }
+
         Guid? externalId = null;
 
         if (!User.Identity?.IsAuthenticated ?? true)
@@ -36,15 +42,35 @@ public class ParticipationsController : ControllerBase
             }
         }
 
-        var query = new CheckParticipationStatusQuery(surveyId, externalId);
+        var query = new CheckParticipationStatusQuery(surveyNumber, externalId);
         var result = await _mediator.SendAsync<CheckParticipationStatusQuery, ParticipationStatusResult>(query, cancellationToken);
         return Ok(result);
     }
 
+    private static int ParseSurveyNumberFromSlug(string slug)
+    {
+        // Format: {slug}-{number}, e.g., "musteri-memnuniyet-anketi-42"
+        // Extract the number from the end
+        var lastHyphenIndex = slug.LastIndexOf('-');
+        if (lastHyphenIndex == -1 || lastHyphenIndex == slug.Length - 1)
+        {
+            return 0;
+        }
+
+        var numberPart = slug.Substring(lastHyphenIndex + 1);
+        return int.TryParse(numberPart, out var number) ? number : 0;
+    }
+
     [AllowAnonymous]
     [HttpPost("start")]
-    public async Task<ActionResult<Guid>> Start([FromBody] StartParticipationRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<int>> Start([FromBody] StartParticipationRequest request, CancellationToken cancellationToken)
     {
+        var surveyNumber = ParseSurveyNumberFromSlug(request.Slug);
+        if (surveyNumber == 0)
+        {
+            return BadRequest("Geçersiz anket URL formatı.");
+        }
+
         Guid? externalId = null;
         var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
@@ -58,24 +84,24 @@ public class ParticipationsController : ControllerBase
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddYears(1)
+                    Expires = DateTime.UtcNow.AddYears(1)
                 });
             }
 
             externalId = cookieId;
         }
 
-        var command = new StartParticipationCommand(request.SurveyId, externalId)
+        var command = new StartParticipationCommand(surveyNumber, externalId)
         {
             IpAddress = ipAddress
         };
-        var participationId = await _mediator.SendAsync<StartParticipationCommand, Guid>(command, cancellationToken);
+        var participationId = await _mediator.SendAsync<StartParticipationCommand, int>(command, cancellationToken);
         return Ok(participationId);
     }
 
     [AllowAnonymous]
-    [HttpPost("{id:guid}/answers")]
-    public async Task<IActionResult> SubmitAnswer(Guid id, [FromBody] SubmitAnswerRequest request, CancellationToken cancellationToken)
+    [HttpPost("{id:int}/answers")]
+    public async Task<IActionResult> SubmitAnswer(int id, [FromBody] SubmitAnswerRequest request, CancellationToken cancellationToken)
     {
         var command = new SubmitAnswerCommand(id, request.QuestionId, request.TextValue, request.OptionIds, request.Attachment);
         await _mediator.SendAsync<SubmitAnswerCommand, bool>(command, cancellationToken);
@@ -83,8 +109,8 @@ public class ParticipationsController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPatch("{id:guid}/complete")]
-    public async Task<IActionResult> Complete(Guid id, CancellationToken cancellationToken)
+    [HttpPatch("{id:int}/complete")]
+    public async Task<IActionResult> Complete(int id, CancellationToken cancellationToken)
     {
         var command = new CompleteParticipationCommand(id);
         await _mediator.SendAsync<CompleteParticipationCommand, bool>(command, cancellationToken);

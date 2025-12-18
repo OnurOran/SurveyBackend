@@ -7,10 +7,11 @@ public interface ISurveyRepository
 {
     Task AddAsync(Survey survey, CancellationToken cancellationToken);
     Task<IReadOnlyList<Survey>> GetAllAsync(CancellationToken cancellationToken);
-    Task<IReadOnlyList<Survey>> GetByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken);
-    Task<Survey?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<IReadOnlyList<Survey>> GetByDepartmentAsync(int departmentId, CancellationToken cancellationToken);
+    Task<Survey?> GetByIdAsync(int id, CancellationToken cancellationToken);
+    Task<Survey?> GetBySurveyNumberAsync(int surveyNumber, CancellationToken cancellationToken);
     Task<IReadOnlyList<SurveyStats>> GetSurveyStatsAsync(CancellationToken cancellationToken);
-    Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(Guid departmentId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<SurveyStats>> GetSurveyStatsByDepartmentAsync(int departmentId, CancellationToken cancellationToken);
     Task UpdateAsync(Survey survey, CancellationToken cancellationToken);
     Task DeleteAsync(Survey survey, CancellationToken cancellationToken);
 }

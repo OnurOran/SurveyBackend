@@ -1,9 +1,11 @@
+using SurveyBackend.Domain.Common;
+
 namespace SurveyBackend.Domain.Surveys;
 
-public class QuestionOption
+public class QuestionOption : CommonEntity
 {
-    public Guid Id { get; private set; }
-    public Guid QuestionId { get; private set; }
+    public int Id { get; private set; }
+    public int QuestionId { get; private set; }
     public string Text { get; private set; } = null!;
     public int Order { get; private set; }
     public int? Value { get; private set; }
@@ -16,28 +18,27 @@ public class QuestionOption
     {
     }
 
-    private QuestionOption(Guid id, Guid questionId, string text, int order, int? value)
+    private QuestionOption(int questionId, string text, int order, int? value)
     {
-        Id = id;
         QuestionId = questionId;
         Text = text;
         Order = order;
         Value = value;
     }
 
-    internal static QuestionOption Create(Guid id, Guid questionId, string text, int order, int? value)
+    internal static QuestionOption Create(int questionId, string text, int order, int? value)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             throw new ArgumentException("Question option text cannot be empty.", nameof(text));
         }
 
-        return new QuestionOption(id, questionId, text.Trim(), order, value);
+        return new QuestionOption(questionId, text.Trim(), order, value);
     }
 
-    public DependentQuestion AddDependentQuestion(Guid id, Guid childQuestionId)
+    public DependentQuestion AddDependentQuestion(int childQuestionId)
     {
-        var dependentQuestion = new DependentQuestion(id, Id, childQuestionId);
+        var dependentQuestion = new DependentQuestion(Id, childQuestionId);
         DependentQuestions.Add(dependentQuestion);
         return dependentQuestion;
     }

@@ -46,7 +46,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
         var existing = await _surveyRepository.GetByIdAsync(request.SurveyId, cancellationToken)
                       ?? throw new InvalidOperationException("Anket bulunamadı.");
 
-        if (existing.IsActive)
+        if (existing.IsPublished)
         {
             throw new InvalidOperationException("Yayınlanmış anketler düzenlenemez.");
         }
@@ -55,20 +55,14 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
         // Build the replacement survey in-memory first (validation before destructive actions)
-        var creator = existing.CreatedBy;
-        var createdAt = existing.CreatedAt;
-
         var replacement = Survey.Create(
-            request.SurveyId,
             request.Title,
             request.Description,
             request.IntroText,
             request.ConsentText,
             request.OutroText,
-            creator,
             departmentId,
-            request.AccessType,
-            createdAt);
+            request.AccessType);
 
         var questionAttachmentQueue = new List<(Question Question, AttachmentUploadDto Attachment)>();
         var optionAttachmentQueue = new List<(QuestionOption Option, AttachmentUploadDto Attachment)>();
@@ -113,7 +107,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
                     }
                 }
 
-                var question = replacement.AddQuestion(Guid.NewGuid(), questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
+                var question = replacement.AddQuestion(questionDto.Text, questionDto.Type, questionDto.Order, questionDto.IsRequired);
                 if (questionDto.Type == Domain.Enums.QuestionType.FileUpload)
                 {
                     var normalizedAllowed = NormalizeAllowedContentTypes(questionDto.AllowedAttachmentContentTypes);
@@ -131,7 +125,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
 
                 foreach (var optionDto in questionDto.Options)
                 {
-                    var option = question.AddOption(Guid.NewGuid(), optionDto.Text, optionDto.Order, optionDto.Value);
+                    var option = question.AddOption(optionDto.Text, optionDto.Order, optionDto.Value);
                     if (optionDto.Attachment is not null)
                     {
                         optionAttachmentQueue.Add((option, optionDto.Attachment));
@@ -148,7 +142,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
                             throw new InvalidOperationException($"Seçenek sırası {childDto.ParentOptionOrder} bulunamadı.");
                         }
 
-                        var childQuestion = replacement.AddQuestion(Guid.NewGuid(), childDto.Text, childDto.Type, childDto.Order, childDto.IsRequired);
+                        var childQuestion = replacement.AddQuestion(childDto.Text, childDto.Type, childDto.Order, childDto.IsRequired);
                         if (childDto.Type == Domain.Enums.QuestionType.FileUpload)
                         {
                             var normalizedAllowed = NormalizeAllowedContentTypes(childDto.AllowedAttachmentContentTypes);
@@ -163,7 +157,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
                         {
                             foreach (var childOptionDto in childDto.Options)
                             {
-                                var childOption = childQuestion.AddOption(Guid.NewGuid(), childOptionDto.Text, childOptionDto.Order, childOptionDto.Value);
+                                var childOption = childQuestion.AddOption(childOptionDto.Text, childOptionDto.Order, childOptionDto.Value);
                                 if (childOptionDto.Attachment is not null)
                                 {
                                     optionAttachmentQueue.Add((childOption, childOptionDto.Attachment));
@@ -171,7 +165,7 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
                             }
                         }
 
-                        parentOption.AddDependentQuestion(Guid.NewGuid(), childQuestion.Id);
+                        parentOption.AddDependentQuestion(childQuestion.Id);
                     }
                 }
             }

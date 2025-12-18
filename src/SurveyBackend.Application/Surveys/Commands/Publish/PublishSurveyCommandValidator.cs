@@ -5,7 +5,7 @@ public sealed class PublishSurveyCommandValidator : AbstractValidator<PublishSur
     public PublishSurveyCommandValidator()
     {
         RuleFor(x => x.SurveyId)
-            .NotEqual(Guid.Empty);
+            .GreaterThan(0);
 
         RuleFor(x => x.EndDate)
             .GreaterThan(x => x.StartDate!.Value)

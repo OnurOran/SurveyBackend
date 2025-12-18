@@ -17,21 +17,21 @@ public sealed class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public Guid? UserId
+    public int? UserId
     {
         get
         {
             var userIdClaim = User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+            return int.TryParse(userIdClaim, out var userId) ? userId : null;
         }
     }
 
-    public Guid? DepartmentId
+    public int? DepartmentId
     {
         get
         {
             var departmentClaim = User?.FindFirst("departmentId")?.Value;
-            return Guid.TryParse(departmentClaim, out var departmentId) ? departmentId : null;
+            return int.TryParse(departmentClaim, out var departmentId) ? departmentId : null;
         }
     }
 

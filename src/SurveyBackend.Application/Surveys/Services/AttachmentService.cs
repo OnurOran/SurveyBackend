@@ -82,11 +82,11 @@ public sealed class AttachmentService : IAttachmentService
 
     private async Task<Attachment> SaveAsync(
         AttachmentOwnerType ownerType,
-        Guid departmentId,
+        int departmentId,
         AttachmentUploadDto upload,
-        Guid? surveyId,
-        Guid? questionId,
-        Guid? optionId,
+        int? surveyId,
+        int? questionId,
+        int? optionId,
         CancellationToken cancellationToken)
     {
         var bytes = Decode(upload.Base64Content);
@@ -95,7 +95,7 @@ public sealed class AttachmentService : IAttachmentService
         using var stream = new MemoryStream(bytes);
         var saveResult = await _fileStorage.SaveAsync(upload.FileName, upload.ContentType, stream, cancellationToken);
 
-        var existing = await _attachmentRepository.GetByOwnerAsync(ownerType, surveyId ?? questionId ?? optionId ?? Guid.Empty, cancellationToken);
+        var existing = await _attachmentRepository.GetByOwnerAsync(ownerType, surveyId ?? questionId ?? optionId ?? 0, cancellationToken);
         if (existing is not null)
         {
             await TryDeleteFileAsync(existing.StoragePath, cancellationToken);
@@ -109,18 +109,17 @@ public sealed class AttachmentService : IAttachmentService
 
     private static Attachment CreateAttachment(
         AttachmentOwnerType ownerType,
-        Guid departmentId,
-        Guid? surveyId,
-        Guid? questionId,
-        Guid? optionId,
+        int departmentId,
+        int? surveyId,
+        int? questionId,
+        int? optionId,
         FileSaveResult saveResult)
     {
-        var now = DateTimeOffset.UtcNow;
         return ownerType switch
         {
-            AttachmentOwnerType.Survey => Attachment.CreateForSurvey(Guid.NewGuid(), surveyId ?? throw new ArgumentNullException(nameof(surveyId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath, now),
-            AttachmentOwnerType.Question => Attachment.CreateForQuestion(Guid.NewGuid(), questionId ?? throw new ArgumentNullException(nameof(questionId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath, now),
-            AttachmentOwnerType.Option => Attachment.CreateForOption(Guid.NewGuid(), optionId ?? throw new ArgumentNullException(nameof(optionId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath, now),
+            AttachmentOwnerType.Survey => Attachment.CreateForSurvey(surveyId ?? throw new ArgumentNullException(nameof(surveyId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath),
+            AttachmentOwnerType.Question => Attachment.CreateForQuestion(questionId ?? throw new ArgumentNullException(nameof(questionId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath),
+            AttachmentOwnerType.Option => Attachment.CreateForOption(optionId ?? throw new ArgumentNullException(nameof(optionId)), departmentId, saveResult.FileName, saveResult.ContentType, saveResult.SizeBytes, saveResult.StoragePath),
             _ => throw new ArgumentOutOfRangeException(nameof(ownerType), ownerType, "Unsupported attachment owner.")
         };
     }

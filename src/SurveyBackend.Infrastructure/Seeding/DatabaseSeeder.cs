@@ -29,7 +29,7 @@ public sealed class DatabaseSeeder
 
     private readonly SurveyBackendDbContext _dbContext;
     private readonly IPasswordHasher _passwordHasher;
-    private static readonly Guid SystemDepartmentId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly int SystemDepartmentId = 1;
 
     public DatabaseSeeder(SurveyBackendDbContext dbContext, IPasswordHasher passwordHasher)
     {
@@ -54,7 +54,7 @@ public sealed class DatabaseSeeder
         {
             if (!await _dbContext.Permissions.AnyAsync(p => p.Name == permission.Name, cancellationToken))
             {
-                _dbContext.Permissions.Add(new Permission(Guid.NewGuid(), permission.Name, permission.Description));
+                _dbContext.Permissions.Add(Permission.Create(permission.Name, permission.Description));
             }
         }
 
@@ -73,7 +73,7 @@ public sealed class DatabaseSeeder
         var role = await _dbContext.Roles.Include(r => r.Permissions).FirstOrDefaultAsync(r => r.Name == roleName, cancellationToken);
         if (role is null)
         {
-            role = new Role(Guid.NewGuid(), roleName, description);
+            role = Role.Create(roleName, description);
             _dbContext.Roles.Add(role);
         }
         else
@@ -112,7 +112,7 @@ public sealed class DatabaseSeeder
         }
 
         var hash = _passwordHasher.Hash("Admin123!");
-        var user = User.CreateSuperAdmin(Guid.NewGuid(), "admin", "admin@local", SystemDepartmentId, hash, DateTimeOffset.UtcNow);
+        var user = User.CreateSuperAdmin("admin", "admin@local", SystemDepartmentId, hash);
         await _dbContext.Users.AddAsync(user, cancellationToken);
     }
 
@@ -123,7 +123,7 @@ public sealed class DatabaseSeeder
             return;
         }
 
-        var department = Department.Create(SystemDepartmentId, "System", "system");
+        var department = Department.Create("System", "system");
         await _dbContext.Departments.AddAsync(department, cancellationToken);
     }
 }
