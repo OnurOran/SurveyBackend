@@ -19,13 +19,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    ExternalIdentifier = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ExternalIdentifier = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -39,20 +39,20 @@ namespace SurveyBackend.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
-                    Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     GroupName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ParentId = table.Column<int>(type: "int", nullable: false),
                     LevelNo = table.Column<int>(type: "int", nullable: false),
-                    Symbol = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Symbol = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
                     OrderNo = table.Column<int>(type: "int", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -69,11 +69,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ExternalId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LdapUsername = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -88,13 +88,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -109,13 +109,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -130,16 +130,16 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Username = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(254)", maxLength: 254, nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
                     IsSuperAdmin = table.Column<bool>(type: "bit", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -160,23 +160,23 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Slug = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Slug = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    IntroText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConsentText = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OutroText = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IntroText = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ConsentText = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    OutroText = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
                     IsPublished = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
                     AccessType = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ParameterTypeId = table.Column<int>(type: "int", nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TypeId = table.Column<int>(type: "int", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -190,8 +190,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Surveys_Parameters_ParameterTypeId",
-                        column: x => x.ParameterTypeId,
+                        name: "FK_Surveys_Parameters_TypeId",
+                        column: x => x.TypeId,
                         principalTable: "Parameters",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -203,11 +203,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     RoleId = table.Column<int>(type: "int", nullable: false),
                     PermissionId = table.Column<int>(type: "int", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -238,11 +238,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                     Token = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RevokedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -264,11 +264,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     RoleId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -306,11 +306,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                     StartedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -344,12 +344,12 @@ namespace SurveyBackend.Infrastructure.Migrations
                     Type = table.Column<int>(type: "int", nullable: false),
                     IsRequired = table.Column<bool>(type: "bit", nullable: false),
                     AllowedAttachmentContentTypes = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
-                    ParameterTypeId = table.Column<int>(type: "int", nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TypeId = table.Column<int>(type: "int", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -357,8 +357,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Questions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Questions_Parameters_ParameterTypeId",
-                        column: x => x.ParameterTypeId,
+                        name: "FK_Questions_Parameters_TypeId",
+                        column: x => x.TypeId,
                         principalTable: "Parameters",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -378,12 +378,12 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ParticipationId = table.Column<int>(type: "int", nullable: false),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
-                    TextValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TextValue = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -411,14 +411,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     QuestionId = table.Column<int>(type: "int", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Order = table.Column<int>(type: "int", nullable: false),
                     Value = table.Column<int>(type: "int", nullable: true),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -442,15 +442,15 @@ namespace SurveyBackend.Infrastructure.Migrations
                     AnswerId = table.Column<int>(type: "int", nullable: false),
                     SurveyId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     StoragePath = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -473,11 +473,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AnswerId = table.Column<int>(type: "int", nullable: false),
                     QuestionOptionId = table.Column<int>(type: "int", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -509,15 +509,15 @@ namespace SurveyBackend.Infrastructure.Migrations
                     SurveyId = table.Column<int>(type: "int", nullable: true),
                     QuestionId = table.Column<int>(type: "int", nullable: true),
                     QuestionOptionId = table.Column<int>(type: "int", nullable: true),
-                    FileName = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     ContentType = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     SizeBytes = table.Column<long>(type: "bigint", nullable: false),
                     StoragePath = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -553,11 +553,11 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ParentQuestionOptionId = table.Column<int>(type: "int", nullable: false),
                     ChildQuestionId = table.Column<int>(type: "int", nullable: false),
-                    CreateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdateEmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdateEmployeeId = table.Column<int>(type: "int", nullable: true),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true)
                 },
@@ -580,7 +580,7 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Parameters",
-                columns: new[] { "Id", "Code", "CreateDate", "CreateEmployeeId", "Description", "DisplayName", "GroupName", "IsActive", "IsDeleted", "LevelNo", "Name", "OrderNo", "ParentId", "Symbol", "UpdateDate", "UpdateEmployeeId" },
+                columns: new[] { "Id", "Code", "CreateDate", "CreateEmployeeId", "Description", "DisplayName", "GroupName", "IsActive", "IsDelete", "LevelNo", "Name", "OrderNo", "ParentId", "Symbol", "UpdateDate", "UpdateEmployeeId" },
                 values: new object[,]
                 {
                     { 1, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "Parameters", "Parameters", true, false, 0, "Parameters", 0, 0, null, null, null },
@@ -688,14 +688,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                 column: "QuestionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Questions_ParameterTypeId",
-                table: "Questions",
-                column: "ParameterTypeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Questions_SurveyId",
                 table: "Questions",
                 column: "SurveyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Questions_TypeId",
+                table: "Questions",
+                column: "TypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
@@ -708,9 +708,9 @@ namespace SurveyBackend.Infrastructure.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Surveys_ParameterTypeId",
+                name: "IX_Surveys_TypeId",
                 table: "Surveys",
-                column: "ParameterTypeId");
+                column: "TypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserRefreshTokens_Token",

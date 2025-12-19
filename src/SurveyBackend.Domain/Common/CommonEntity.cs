@@ -6,9 +6,14 @@ namespace SurveyBackend.Domain.Common;
 public abstract class CommonEntity
 {
     /// <summary>
-    /// ID of the employee who created this record
+    /// Indicates whether this record is active
     /// </summary>
-    public string? CreateEmployeeId { get; protected set; }
+    public bool IsActive { get; protected set; } = true;
+
+    /// <summary>
+    /// Indicates whether this record is deleted (soft delete)
+    /// </summary>
+    public bool IsDelete { get; protected set; }
 
     /// <summary>
     /// Date and time when this record was created (Turkey timezone assumed)
@@ -16,9 +21,9 @@ public abstract class CommonEntity
     public DateTime CreateDate { get; protected set; }
 
     /// <summary>
-    /// ID of the employee who last updated this record
+    /// ID of the employee (User ID) who created this record
     /// </summary>
-    public string? UpdateEmployeeId { get; protected set; }
+    public int? CreateEmployeeId { get; protected set; }
 
     /// <summary>
     /// Date and time when this record was last updated (Turkey timezone assumed)
@@ -26,14 +31,9 @@ public abstract class CommonEntity
     public DateTime? UpdateDate { get; protected set; }
 
     /// <summary>
-    /// Indicates whether this record is deleted (soft delete)
+    /// ID of the employee (User ID) who last updated this record
     /// </summary>
-    public bool IsDeleted { get; protected set; }
-
-    /// <summary>
-    /// Indicates whether this record is active
-    /// </summary>
-    public bool IsActive { get; protected set; } = true;
+    public int? UpdateEmployeeId { get; protected set; }
 
     /// <summary>
     /// Row version for optimistic concurrency control
@@ -45,7 +45,7 @@ public abstract class CommonEntity
     /// </summary>
     public void Delete()
     {
-        IsDeleted = true;
+        IsDelete = true;
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public abstract class CommonEntity
     /// </summary>
     public void Restore()
     {
-        IsDeleted = false;
+        IsDelete = false;
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public abstract class CommonEntity
     /// <summary>
     /// Sets audit fields for entity creation
     /// </summary>
-    public void SetCreatedAudit(string? employeeId, DateTime timestamp)
+    public void SetCreatedAudit(int? employeeId, DateTime timestamp)
     {
         CreateEmployeeId = employeeId;
         CreateDate = timestamp;
@@ -84,7 +84,7 @@ public abstract class CommonEntity
     /// <summary>
     /// Sets audit fields for entity update
     /// </summary>
-    public void SetUpdatedAudit(string? employeeId, DateTime timestamp)
+    public void SetUpdatedAudit(int? employeeId, DateTime timestamp)
     {
         UpdateEmployeeId = employeeId;
         UpdateDate = timestamp;

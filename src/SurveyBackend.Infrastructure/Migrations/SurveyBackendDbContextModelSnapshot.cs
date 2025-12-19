@@ -33,24 +33,24 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ExternalIdentifier")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -60,8 +60,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -77,14 +77,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Code")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -103,7 +103,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("LevelNo")
@@ -126,14 +126,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Symbol")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -147,7 +147,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Parameters",
                             GroupName = "Parameters",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 0,
                             Name = "Parameters",
                             OrderNo = 0,
@@ -161,7 +161,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Anket Erişim Türleri",
                             GroupName = "SurveyAccessTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 1,
                             Name = "SurveyAccessTypes",
                             OrderNo = 0,
@@ -176,7 +176,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Dahili",
                             GroupName = "SurveyAccessTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "Internal",
                             OrderNo = 0,
@@ -191,7 +191,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Halka Açık",
                             GroupName = "SurveyAccessTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "Public",
                             OrderNo = 1,
@@ -205,7 +205,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Soru Türleri",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 1,
                             Name = "QuestionTypes",
                             OrderNo = 1,
@@ -220,7 +220,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Tekli Seçim",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "SingleSelect",
                             OrderNo = 0,
@@ -235,7 +235,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Çoklu Seçim",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "MultiSelect",
                             OrderNo = 1,
@@ -250,7 +250,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Açık Metin",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "OpenText",
                             OrderNo = 2,
@@ -265,7 +265,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Dosya Yükleme",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "FileUpload",
                             OrderNo = 3,
@@ -280,7 +280,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                             DisplayName = "Koşullu",
                             GroupName = "QuestionTypes",
                             IsActive = true,
-                            IsDeleted = false,
+                            IsDelete = false,
                             LevelNo = 2,
                             Name = "Conditional",
                             OrderNo = 4,
@@ -299,24 +299,24 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -326,8 +326,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -345,24 +345,24 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -372,8 +372,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -391,13 +391,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<byte[]>("RowVersion")
@@ -408,8 +408,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -429,13 +429,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("ParticipationId")
@@ -450,13 +450,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("TextValue")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -486,21 +487,21 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<byte[]>("RowVersion")
@@ -522,8 +523,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -547,13 +548,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("QuestionOptionId")
@@ -567,8 +568,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -595,21 +596,21 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("OwnerType")
@@ -640,8 +641,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -677,13 +678,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("ParentQuestionOptionId")
@@ -697,8 +698,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -720,8 +721,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("ExternalId")
                         .HasColumnType("uniqueidentifier");
@@ -729,7 +730,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<string>("LdapUsername")
@@ -744,8 +745,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -774,8 +775,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
@@ -784,7 +785,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("ParticipantId")
@@ -804,8 +805,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -831,8 +832,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -841,16 +842,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsRequired")
                         .HasColumnType("bit");
 
                     b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ParameterTypeId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
@@ -869,17 +867,20 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ParameterTypeId");
-
                     b.HasIndex("SurveyId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Questions", (string)null);
                 });
@@ -895,13 +896,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<int>("Order")
@@ -917,14 +918,14 @@ namespace SurveyBackend.Infrastructure.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Value")
                         .HasColumnType("int");
@@ -948,13 +949,14 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ConsentText")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
@@ -967,12 +969,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("IntroText")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPublished")
@@ -981,10 +984,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasDefaultValue(false);
 
                     b.Property<string>("OutroText")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ParameterTypeId")
-                        .HasColumnType("int");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -993,8 +994,8 @@ namespace SurveyBackend.Infrastructure.Migrations
 
                     b.Property<string>("Slug")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
@@ -1004,17 +1005,20 @@ namespace SurveyBackend.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int?>("TypeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
-                    b.HasIndex("ParameterTypeId");
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Surveys", (string)null);
                 });
@@ -1030,8 +1034,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -1039,7 +1043,7 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("RevokedAt")
@@ -1058,8 +1062,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -1085,21 +1089,21 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsSuperAdmin")
@@ -1117,13 +1121,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -1146,13 +1150,13 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("CreateEmployeeId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 
                     b.Property<byte[]>("RowVersion")
@@ -1163,8 +1167,8 @@ namespace SurveyBackend.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UpdateEmployeeId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("UpdateEmployeeId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId", "RoleId", "DepartmentId");
 
@@ -1305,16 +1309,16 @@ namespace SurveyBackend.Infrastructure.Migrations
 
             modelBuilder.Entity("SurveyBackend.Domain.Surveys.Question", b =>
                 {
-                    b.HasOne("SurveyBackend.Domain.Parameters.Parameter", null)
-                        .WithMany()
-                        .HasForeignKey("ParameterTypeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("SurveyBackend.Domain.Surveys.Survey", "Survey")
                         .WithMany("Questions")
                         .HasForeignKey("SurveyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("SurveyBackend.Domain.Parameters.Parameter", null)
+                        .WithMany()
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Survey");
                 });
@@ -1340,7 +1344,7 @@ namespace SurveyBackend.Infrastructure.Migrations
 
                     b.HasOne("SurveyBackend.Domain.Parameters.Parameter", null)
                         .WithMany()
-                        .HasForeignKey("ParameterTypeId")
+                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 

@@ -43,21 +43,21 @@ public sealed class GetDepartmentSurveysQueryHandler : ICommandHandler<GetDepart
         return result;
     }
 
-    private async Task<string> ResolveCreatorAsync(string? createdByValue, Dictionary<int, string> cache, CancellationToken cancellationToken)
+    private async Task<string> ResolveCreatorAsync(int? userId, Dictionary<int, string> cache, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(createdByValue) || !int.TryParse(createdByValue, out var userId))
+        if (!userId.HasValue)
         {
-            return createdByValue ?? "Bilinmeyen";
+            return "Bilinmeyen";
         }
 
-        if (cache.TryGetValue(userId, out var cached))
+        if (cache.TryGetValue(userId.Value, out var cached))
         {
             return cached;
         }
 
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
-        var resolved = user?.Username ?? createdByValue;
-        cache[userId] = resolved;
+        var user = await _userRepository.GetByIdAsync(userId.Value, cancellationToken);
+        var resolved = user?.Username ?? $"User#{userId}";
+        cache[userId.Value] = resolved;
         return resolved;
     }
 }

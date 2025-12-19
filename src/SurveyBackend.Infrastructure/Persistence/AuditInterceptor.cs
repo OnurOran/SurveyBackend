@@ -37,7 +37,7 @@ public class AuditInterceptor : SaveChangesInterceptor
         if (context is null) return;
 
         var timestamp = DateTime.Now; // Turkey timezone assumed
-        var userId = _currentUserService.UserId?.ToString();
+        var userId = _currentUserService.UserId;
 
         foreach (var entry in context.ChangeTracker.Entries<CommonEntity>())
         {
