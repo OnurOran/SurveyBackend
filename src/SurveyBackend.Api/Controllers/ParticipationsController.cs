@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using SurveyBackend.Application.Abstractions.Messaging;
+using SurveyBackend.Application.Interfaces.Persistence;
 using SurveyBackend.Application.Participations.Commands.CompleteParticipation;
 using SurveyBackend.Application.Participations.Commands.StartParticipation;
 using SurveyBackend.Application.Participations.Commands.SubmitAnswer;
@@ -16,20 +17,22 @@ public class ParticipationsController : ControllerBase
 {
     private const string ParticipantCookieName = "X-Survey-Participant";
     private readonly IAppMediator _mediator;
+    private readonly ISurveyRepository _surveyRepository;
 
-    public ParticipationsController(IAppMediator mediator)
+    public ParticipationsController(IAppMediator mediator, ISurveyRepository surveyRepository)
     {
         _mediator = mediator;
+        _surveyRepository = surveyRepository;
     }
 
     [AllowAnonymous]
     [HttpGet("status/{slug}")]
     public async Task<ActionResult<ParticipationStatusResult>> CheckStatus(string slug, CancellationToken cancellationToken)
     {
-        var surveyNumber = ParseSurveyNumberFromSlug(slug);
-        if (surveyNumber == 0)
+        var survey = await _surveyRepository.GetBySlugAsync(slug, cancellationToken);
+        if (survey is null)
         {
-            return BadRequest("Geçersiz anket URL formatı.");
+            return NotFound("Anket bulunamadı.");
         }
 
         Guid? externalId = null;
@@ -42,33 +45,19 @@ public class ParticipationsController : ControllerBase
             }
         }
 
-        var query = new CheckParticipationStatusQuery(surveyNumber, externalId);
+        var query = new CheckParticipationStatusQuery(survey.Id, externalId);
         var result = await _mediator.SendAsync<CheckParticipationStatusQuery, ParticipationStatusResult>(query, cancellationToken);
         return Ok(result);
-    }
-
-    private static int ParseSurveyNumberFromSlug(string slug)
-    {
-        // Format: {slug}-{number}, e.g., "musteri-memnuniyet-anketi-42"
-        // Extract the number from the end
-        var lastHyphenIndex = slug.LastIndexOf('-');
-        if (lastHyphenIndex == -1 || lastHyphenIndex == slug.Length - 1)
-        {
-            return 0;
-        }
-
-        var numberPart = slug.Substring(lastHyphenIndex + 1);
-        return int.TryParse(numberPart, out var number) ? number : 0;
     }
 
     [AllowAnonymous]
     [HttpPost("start")]
     public async Task<ActionResult<int>> Start([FromBody] StartParticipationRequest request, CancellationToken cancellationToken)
     {
-        var surveyNumber = ParseSurveyNumberFromSlug(request.Slug);
-        if (surveyNumber == 0)
+        var survey = await _surveyRepository.GetBySlugAsync(request.Slug, cancellationToken);
+        if (survey is null)
         {
-            return BadRequest("Geçersiz anket URL formatı.");
+            return NotFound("Anket bulunamadı.");
         }
 
         Guid? externalId = null;
@@ -91,7 +80,7 @@ public class ParticipationsController : ControllerBase
             externalId = cookieId;
         }
 
-        var command = new StartParticipationCommand(surveyNumber, externalId)
+        var command = new StartParticipationCommand(survey.Id, externalId)
         {
             IpAddress = ipAddress
         };

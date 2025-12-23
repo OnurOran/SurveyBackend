@@ -24,8 +24,8 @@ public sealed class CheckParticipationStatusQueryHandler : ICommandHandler<Check
 
     public async Task<ParticipationStatusResult> HandleAsync(CheckParticipationStatusQuery request, CancellationToken cancellationToken)
     {
-        // Get survey by survey number to get its ID
-        var survey = await _surveyRepository.GetBySurveyNumberAsync(request.SurveyNumber, cancellationToken);
+        // Get survey by ID
+        var survey = await _surveyRepository.GetByIdAsync(request.SurveyNumber, cancellationToken);
         if (survey is null)
         {
             throw new InvalidOperationException("Anket bulunamadı.");

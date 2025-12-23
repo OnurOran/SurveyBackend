@@ -52,7 +52,18 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
-        var survey = Survey.Create(request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, departmentId, request.AccessType);
+        // Generate unique slug for the survey
+        var baseSlug = Survey.GenerateSlug(request.Title);
+        var slug = baseSlug;
+        var counter = 1;
+
+        // Ensure slug uniqueness by appending counter if needed
+        while (await _surveyRepository.SlugExistsAsync(slug, cancellationToken))
+        {
+            slug = $"{baseSlug}-{counter++}";
+        }
+
+        var survey = Survey.Create(slug, request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, departmentId, request.AccessType);
 
         var questionAttachmentQueue = new List<(Question Question, AttachmentUploadDto Attachment)>();
         var optionAttachmentQueue = new List<(QuestionOption Option, AttachmentUploadDto Attachment)>();

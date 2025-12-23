@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SurveyBackend.Api.Authorization;
 using SurveyBackend.Application.Abstractions.Messaging;
 using SurveyBackend.Application.Interfaces.Identity;
+using SurveyBackend.Application.Interfaces.Persistence;
 using SurveyBackend.Application.Surveys.Commands.AddQuestion;
 using SurveyBackend.Application.Surveys.Commands.Create;
 using SurveyBackend.Application.Surveys.Commands.Update;
@@ -22,11 +23,13 @@ public class SurveysController : ControllerBase
 {
     private readonly IAppMediator _mediator;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ISurveyRepository _surveyRepository;
 
-    public SurveysController(IAppMediator mediator, ICurrentUserService currentUserService)
+    public SurveysController(IAppMediator mediator, ICurrentUserService currentUserService, ISurveyRepository surveyRepository)
     {
         _mediator = mediator;
         _currentUserService = currentUserService;
+        _surveyRepository = surveyRepository;
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsers)]
@@ -105,22 +108,8 @@ public class SurveysController : ControllerBase
     [HttpGet("by-slug/{slug}")]
     public async Task<ActionResult<SurveyDetailDto>> GetSurveyBySlug(string slug, CancellationToken cancellationToken)
     {
-        // Parse survey number from slug (format: "{slug}-{number}")
-        var lastHyphenIndex = slug.LastIndexOf('-');
-        if (lastHyphenIndex == -1 || lastHyphenIndex == slug.Length - 1)
-        {
-            return BadRequest("Geçersiz anket URL formatı.");
-        }
-
-        var numberPart = slug.Substring(lastHyphenIndex + 1);
-        if (!int.TryParse(numberPart, out var surveyNumber))
-        {
-            return BadRequest("Geçersiz anket URL formatı.");
-        }
-
-        // Fetch survey by number, then use existing query to get full details
-        var surveyRepository = HttpContext.RequestServices.GetRequiredService<SurveyBackend.Application.Interfaces.Persistence.ISurveyRepository>();
-        var survey = await surveyRepository.GetBySurveyNumberAsync(surveyNumber, cancellationToken);
+        // Fetch survey by slug directly
+        var survey = await _surveyRepository.GetBySlugAsync(slug, cancellationToken);
 
         if (survey is null)
         {

@@ -25,7 +25,7 @@ public sealed class StartParticipationCommandHandler : ICommandHandler<StartPart
 
     public async Task<int> HandleAsync(StartParticipationCommand request, CancellationToken cancellationToken)
     {
-        var survey = await _surveyRepository.GetBySurveyNumberAsync(request.SurveyNumber, cancellationToken)
+        var survey = await _surveyRepository.GetByIdAsync(request.SurveyNumber, cancellationToken)
                      ?? throw new InvalidOperationException("Anket bulunamadı.");
 
         if (!IsAvailable(survey))

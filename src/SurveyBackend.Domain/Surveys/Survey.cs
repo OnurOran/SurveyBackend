@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using SurveyBackend.Domain.Common;
 using SurveyBackend.Domain.Enums;
 
@@ -5,6 +6,9 @@ namespace SurveyBackend.Domain.Surveys;
 
 public class Survey : CommonEntity
 {
+    private static readonly Regex NonAlphanumericRegex = new(@"[^a-z0-9]+", RegexOptions.Compiled);
+    private static readonly Regex MultipleHyphensRegex = new(@"-+", RegexOptions.Compiled);
+
     public int Id { get; private set; }
     public string Slug { get; private set; } = null!;
     public string Title { get; private set; } = null!;
@@ -25,9 +29,9 @@ public class Survey : CommonEntity
     {
     }
 
-    private Survey(string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate, DateTime? endDate)
+    private Survey(string slug, string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate, DateTime? endDate)
     {
-        Slug = GenerateSlug(title);
+        Slug = slug;
         Title = title;
         Description = description;
         IntroText = introText;
@@ -40,48 +44,54 @@ public class Survey : CommonEntity
         IsPublished = false;
     }
 
-    private static string GenerateSlug(string title)
+    public static string GenerateSlug(string title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
             return "anket";
         }
 
-        // Turkish character replacements
-        var slug = title.ToLowerInvariant()
-            .Replace('ı', 'i')
+        // Turkish character replacements - handle uppercase first, then lowercase
+        var slug = title
+            .Replace('İ', 'I')  // Turkish capital I with dot
+            .Replace('Ğ', 'G')
+            .Replace('Ü', 'U')
+            .Replace('Ş', 'S')
+            .Replace('Ö', 'O')
+            .Replace('Ç', 'C')
+            .ToLowerInvariant()  // Now convert to lowercase
+            .Replace('ı', 'i')   // Turkish lowercase i without dot
             .Replace('ğ', 'g')
             .Replace('ü', 'u')
             .Replace('ş', 's')
             .Replace('ö', 'o')
-            .Replace('ç', 'c')
-            .Replace('İ', 'i')
-            .Replace('Ğ', 'g')
-            .Replace('Ü', 'u')
-            .Replace('Ş', 's')
-            .Replace('Ö', 'o')
-            .Replace('Ç', 'c');
+            .Replace('ç', 'c');
 
         // Replace non-alphanumeric with hyphens
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9]+", "-");
+        slug = NonAlphanumericRegex.Replace(slug, "-");
 
         // Remove leading/trailing hyphens and multiple consecutive hyphens
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-+", "-").Trim('-');
+        slug = MultipleHyphensRegex.Replace(slug, "-").Trim('-');
 
         // Limit length to 100 characters
         if (slug.Length > 100)
         {
-            slug = slug.Substring(0, 100).TrimEnd('-');
+            slug = slug[..100].TrimEnd('-');
         }
 
         return string.IsNullOrWhiteSpace(slug) ? "anket" : slug;
     }
 
-    public static Survey Create(string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate = null, DateTime? endDate = null)
+    public static Survey Create(string slug, string title, string? description, string? introText, string? consentText, string? outroText, int departmentId, AccessType accessType, DateTime? startDate = null, DateTime? endDate = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
             throw new ArgumentException("Survey title cannot be empty.", nameof(title));
+        }
+
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            throw new ArgumentException("Survey slug cannot be empty.", nameof(slug));
         }
 
         if (departmentId <= 0)
@@ -94,7 +104,7 @@ public class Survey : CommonEntity
             throw new ArgumentException("EndDate must be later than StartDate when both are provided.", nameof(endDate));
         }
 
-        return new Survey(title.Trim(), description?.Trim(), introText?.Trim(), consentText?.Trim(), outroText?.Trim(), departmentId, accessType, startDate, endDate);
+        return new Survey(slug.Trim(), title.Trim(), description?.Trim(), introText?.Trim(), consentText?.Trim(), outroText?.Trim(), departmentId, accessType, startDate, endDate);
     }
 
     public void Publish(DateTime? startDate = null, DateTime? endDate = null)
@@ -127,7 +137,8 @@ public class Survey : CommonEntity
         }
 
         Title = title.Trim();
-        Slug = GenerateSlug(title);
+        // IMPORTANT: Don't regenerate slug on update to prevent breaking existing URLs
+        // Slug remains unchanged throughout survey lifetime
         Description = description?.Trim();
         IntroText = introText?.Trim();
         ConsentText = consentText?.Trim();

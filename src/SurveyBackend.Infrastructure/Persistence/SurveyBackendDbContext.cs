@@ -62,7 +62,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Department>(entity =>
         {
-            entity.ToTable("Departments");
+            entity.ToTable("Department");
             entity.HasKey(d => d.Id);
             entity.Property(d => d.Id)
                 .ValueGeneratedOnAdd();
@@ -78,7 +78,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.ToTable("Users");
+            entity.ToTable("User");
             entity.HasKey(u => u.Id);
             entity.Property(u => u.Id)
                 .ValueGeneratedOnAdd();
@@ -108,7 +108,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<RefreshToken>(entity =>
         {
-            entity.ToTable("UserRefreshTokens");
+            entity.ToTable("UserRefreshToken");
             entity.HasKey(rt => rt.Id);
             entity.Property(rt => rt.Id)
                 .ValueGeneratedOnAdd();
@@ -125,7 +125,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.ToTable("Roles");
+            entity.ToTable("Role");
             entity.HasKey(r => r.Id);
             entity.Property(r => r.Id)
                 .ValueGeneratedOnAdd();
@@ -141,7 +141,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Permission>(entity =>
         {
-            entity.ToTable("Permissions");
+            entity.ToTable("Permission");
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Id)
                 .ValueGeneratedOnAdd();
@@ -154,7 +154,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<RolePermission>(entity =>
         {
-            entity.ToTable("RolePermissions");
+            entity.ToTable("RolePermission");
             entity.HasKey(rp => new { rp.RoleId, rp.PermissionId });
             entity.HasOne(rp => rp.Permission)
                 .WithMany()
@@ -163,7 +163,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.ToTable("UserRoles");
+            entity.ToTable("UserRole");
             entity.HasKey(ur => new { ur.UserId, ur.RoleId, ur.DepartmentId });
             entity.Property(ur => ur.DepartmentId)
                 .IsRequired();
@@ -178,7 +178,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Survey>(entity =>
         {
-            entity.ToTable("Surveys");
+            entity.ToTable("Survey");
             entity.HasKey(s => s.Id);
             entity.Property(s => s.Id)
                 .ValueGeneratedOnAdd();
@@ -186,6 +186,9 @@ public class SurveyBackendDbContext : DbContext
             entity.Property(s => s.Slug)
                 .IsRequired()
                 .HasMaxLength(100);
+
+            entity.HasIndex(s => s.Slug)
+                .IsUnique();
 
             entity.Property(s => s.Title)
                 .IsRequired()
@@ -232,7 +235,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Question>(entity =>
         {
-            entity.ToTable("Questions");
+            entity.ToTable("Question");
             entity.HasKey(q => q.Id);
             entity.Property(q => q.Id)
                 .ValueGeneratedOnAdd();
@@ -273,7 +276,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<QuestionOption>(entity =>
         {
-            entity.ToTable("QuestionOptions");
+            entity.ToTable("QuestionOption");
             entity.HasKey(qo => qo.Id);
             entity.Property(qo => qo.Id)
                 .ValueGeneratedOnAdd();
@@ -296,7 +299,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<DependentQuestion>(entity =>
         {
-            entity.ToTable("DependentQuestions");
+            entity.ToTable("DependentQuestion");
             entity.HasKey(dq => dq.Id);
             entity.Property(dq => dq.Id)
                 .ValueGeneratedOnAdd();
@@ -313,7 +316,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Participant>(entity =>
         {
-            entity.ToTable("Participants");
+            entity.ToTable("Participant");
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Id)
                 .ValueGeneratedOnAdd();
@@ -332,7 +335,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Participation>(entity =>
         {
-            entity.ToTable("Participations");
+            entity.ToTable("Participation");
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Id)
                 .ValueGeneratedOnAdd();
@@ -364,7 +367,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Answer>(entity =>
         {
-            entity.ToTable("Answers");
+            entity.ToTable("Answer");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id)
                 .ValueGeneratedOnAdd();
@@ -388,7 +391,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<AnswerOption>(entity =>
         {
-            entity.ToTable("AnswerOptions");
+            entity.ToTable("AnswerOption");
             entity.HasKey(ao => ao.Id);
             entity.Property(ao => ao.Id)
                 .ValueGeneratedOnAdd();
@@ -405,7 +408,7 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<AnswerAttachment>(entity =>
         {
-            entity.ToTable("AnswerAttachments");
+            entity.ToTable("AnswerAttachment");
             entity.HasKey(a => a.Id);
             entity.Property(a => a.Id)
                 .ValueGeneratedOnAdd();
@@ -436,9 +439,9 @@ public class SurveyBackendDbContext : DbContext
 
         modelBuilder.Entity<Attachment>(entity =>
         {
-            entity.ToTable("Attachments", tableBuilder =>
+            entity.ToTable("Attachment", tableBuilder =>
             {
-                tableBuilder.HasCheckConstraint("CK_Attachments_SingleOwner", @"
+                tableBuilder.HasCheckConstraint("CK_Attachment_SingleOwner", @"
                 (
                     (CASE WHEN SurveyId IS NOT NULL THEN 1 ELSE 0 END) +
                     (CASE WHEN QuestionId IS NOT NULL THEN 1 ELSE 0 END) +
@@ -496,7 +499,7 @@ public class SurveyBackendDbContext : DbContext
         // Real type definitions are managed via C# enums (AccessType, QuestionType, etc.)
         modelBuilder.Entity<Parameter>(entity =>
         {
-            entity.ToTable("Parameters");
+            entity.ToTable("Parameter");
             entity.HasKey(p => p.Id);
 
             entity.Property(p => p.Id)

@@ -55,7 +55,9 @@ public sealed class UpdateSurveyCommandHandler : ICommandHandler<UpdateSurveyCom
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
         // Build the replacement survey in-memory first (validation before destructive actions)
+        // Keep the existing slug to prevent breaking URLs
         var replacement = Survey.Create(
+            existing.Slug,
             request.Title,
             request.Description,
             request.IntroText,

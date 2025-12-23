@@ -15,6 +15,32 @@ public sealed class SurveyRepository : ISurveyRepository
         _dbContext = dbContext;
     }
 
+    /// <summary>
+    /// Applies all necessary includes for loading a complete survey with all related entities.
+    /// </summary>
+    private static IQueryable<Survey> IncludeFullSurveyGraph(IQueryable<Survey> query)
+    {
+        return query
+            .Include(s => s.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.DependentQuestions)
+                        .ThenInclude(dq => dq.ChildQuestion)
+                            .ThenInclude(cq => cq.Options)
+                                .ThenInclude(o => o.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.DependentQuestions)
+                        .ThenInclude(dq => dq.ChildQuestion)
+                            .ThenInclude(cq => cq.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Attachment)
+            .Include(s => s.Questions)
+                .ThenInclude(q => q.Options)
+                    .ThenInclude(o => o.Attachment)
+            .AsSplitQuery();
+    }
+
     public async Task AddAsync(Survey survey, CancellationToken cancellationToken)
     {
         await _dbContext.Surveys.AddAsync(survey, cancellationToken);
@@ -40,50 +66,21 @@ public sealed class SurveyRepository : ISurveyRepository
 
     public async Task<Survey?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await _dbContext.Surveys
-            .Include(s => s.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.DependentQuestions)
-                        .ThenInclude(dq => dq.ChildQuestion)
-                            .ThenInclude(cq => cq.Options)
-                                .ThenInclude(o => o.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.DependentQuestions)
-                        .ThenInclude(dq => dq.ChildQuestion)
-                            .ThenInclude(cq => cq.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.Attachment)
-            .AsSplitQuery()
+        return await IncludeFullSurveyGraph(_dbContext.Surveys)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
     }
 
-    public async Task<Survey?> GetBySurveyNumberAsync(int surveyNumber, CancellationToken cancellationToken)
+    public async Task<Survey?> GetBySlugAsync(string slug, CancellationToken cancellationToken)
+    {
+        return await IncludeFullSurveyGraph(_dbContext.Surveys)
+            .FirstOrDefaultAsync(s => s.Slug == slug, cancellationToken);
+    }
+
+    public async Task<bool> SlugExistsAsync(string slug, CancellationToken cancellationToken)
     {
         return await _dbContext.Surveys
-            .Include(s => s.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.DependentQuestions)
-                        .ThenInclude(dq => dq.ChildQuestion)
-                            .ThenInclude(cq => cq.Options)
-                                .ThenInclude(o => o.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.DependentQuestions)
-                        .ThenInclude(dq => dq.ChildQuestion)
-                            .ThenInclude(cq => cq.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Attachment)
-            .Include(s => s.Questions)
-                .ThenInclude(q => q.Options)
-                    .ThenInclude(o => o.Attachment)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync(s => s.Id == surveyNumber, cancellationToken);
+            .AsNoTracking()
+            .AnyAsync(s => s.Slug == slug, cancellationToken);
     }
 
     public async Task<IReadOnlyList<SurveyStats>> GetSurveyStatsAsync(CancellationToken cancellationToken)
