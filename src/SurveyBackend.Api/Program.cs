@@ -137,11 +137,16 @@ builder.Services.AddHostedService<TokenCleanupService>();
 
 var app = builder.Build();
 
+// Apply migrations automatically in development
 if (app.Environment.IsDevelopment())
 {
     await app.ApplyDatabaseMigrationsAsync();
+}
 
-    using var scope = app.Services.CreateScope();
+// Seed essential data in ALL environments (dev, test, prod)
+// This creates the system department, permissions, roles, and admin user
+using (var scope = app.Services.CreateScope())
+{
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
 }
