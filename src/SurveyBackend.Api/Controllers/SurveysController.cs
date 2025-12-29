@@ -108,7 +108,27 @@ public class SurveysController : ControllerBase
     [HttpGet("by-slug/{slug}")]
     public async Task<ActionResult<SurveyDetailDto>> GetSurveyBySlug(string slug, CancellationToken cancellationToken)
     {
-        // Fetch survey by slug directly
+        // Expected format: {slug}-{id}
+        // Try to parse the ID from the end of the slug
+        var lastHyphenIndex = slug.LastIndexOf('-');
+
+        if (lastHyphenIndex > 0 && lastHyphenIndex < slug.Length - 1)
+        {
+            var potentialId = slug.Substring(lastHyphenIndex + 1);
+
+            // If the last part is a number, treat it as the survey ID
+            if (int.TryParse(potentialId, out var surveyId))
+            {
+                // Use existing GetSurveyQuery to get full details with authorization checks
+                var response = await _mediator.SendAsync<GetSurveyQuery, SurveyDetailDto?>(new GetSurveyQuery(surveyId), cancellationToken);
+                if (response is not null)
+                {
+                    return Ok(response);
+                }
+            }
+        }
+
+        // Fallback: Try to fetch by exact slug match (for backwards compatibility)
         var survey = await _surveyRepository.GetBySlugAsync(slug, cancellationToken);
 
         if (survey is null)
@@ -117,13 +137,13 @@ public class SurveysController : ControllerBase
         }
 
         // Use existing GetSurveyQuery to get full details with authorization checks
-        var response = await _mediator.SendAsync<GetSurveyQuery, SurveyDetailDto?>(new GetSurveyQuery(survey.Id), cancellationToken);
-        if (response is null)
+        var fallbackResponse = await _mediator.SendAsync<GetSurveyQuery, SurveyDetailDto?>(new GetSurveyQuery(survey.Id), cancellationToken);
+        if (fallbackResponse is null)
         {
             return NotFound();
         }
 
-        return Ok(response);
+        return Ok(fallbackResponse);
     }
 
     [Authorize(Policy = PermissionPolicies.ManageUsersOrDepartment)]

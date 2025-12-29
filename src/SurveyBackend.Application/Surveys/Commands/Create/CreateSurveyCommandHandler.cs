@@ -52,18 +52,11 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
 
         await _authorizationService.EnsureDepartmentScopeAsync(departmentId, cancellationToken);
 
-        // Generate unique slug for the survey
+        // Generate base slug for the survey (ID will be appended after creation)
         var baseSlug = Survey.GenerateSlug(request.Title);
-        var slug = baseSlug;
-        var counter = 1;
 
-        // Ensure slug uniqueness by appending counter if needed
-        while (await _surveyRepository.SlugExistsAsync(slug, cancellationToken))
-        {
-            slug = $"{baseSlug}-{counter++}";
-        }
-
-        var survey = Survey.Create(slug, request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, departmentId, request.AccessType);
+        // Create survey with temporary slug (will be updated after getting ID)
+        var survey = Survey.Create(baseSlug, request.Title, request.Description, request.IntroText, request.ConsentText, request.OutroText, departmentId, request.AccessType);
 
         var questionAttachmentQueue = new List<(Question Question, AttachmentUploadDto Attachment)>();
         var optionAttachmentQueue = new List<(QuestionOption Option, AttachmentUploadDto Attachment)>();
@@ -178,6 +171,11 @@ public sealed class CreateSurveyCommandHandler : ICommandHandler<CreateSurveyCom
         }
 
         await _surveyRepository.AddAsync(survey, cancellationToken);
+
+        // Update slug to include ID: {baseSlug}-{id}
+        var finalSlug = $"{baseSlug}-{survey.Id}";
+        survey.UpdateSlug(finalSlug);
+        await _surveyRepository.UpdateAsync(survey, cancellationToken);
 
         if (request.Attachment is not null)
         {

@@ -145,4 +145,14 @@ public class Survey : CommonEntity
         OutroText = outroText?.Trim();
         AccessType = accessType;
     }
+
+    public void UpdateSlug(string slug)
+    {
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            throw new ArgumentException("Survey slug cannot be empty.", nameof(slug));
+        }
+
+        Slug = slug.Trim();
+    }
 }
